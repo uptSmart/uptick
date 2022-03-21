@@ -54,7 +54,7 @@ The following table provides an example where the second row corresponds to an u
 
 | ChainID        | Identifier | EIP155 Number | Version Number |
 |----------------|------------|---------------|----------------|
-| `uptick_7776-1` | uptick      | 9000          | 1              |
-| `uptick_7776-1` | uptick      | 9000          | 2              |
+| `uptick_7776-1` | uptick      | 7776          | 1              |
+| `uptick_7776-2` | uptick      | 7776          | 2              |
 | `...`          | ...        | ...           | ...            |
-| `uptick_7776-N` | uptick      | 9000          | N              |
+| `uptick_7776-N` | uptick      | 7776          | N              |

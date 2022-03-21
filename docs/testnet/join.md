@@ -119,7 +119,7 @@ For more details on how to configure your validator, follow the validator [setup
 
 ```bash
 uptickd tx staking create-validator \
-  --amount=1000000000000auptick \
+  --amount=5000000000000000000auptick \
   --pubkey=$(uptickd tendermint show-validator) \
   --moniker="UptickBuilder" \
   --chain-id=<chain_id> \

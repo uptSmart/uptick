@@ -62,7 +62,7 @@ module.exports = {
       rpc_url_local: 'http://localhost:8545/',
       chain_id: '7777',
       testnet_chain_id: '7776',
-      latest_version: 'v0.4.2',
+      latest_version: 'v0.1.0',
       version_number: '1',
       testnet_version_number: '2',
       cosmos_block_explorer_url: 'https://explorer.uptick.org',
