@@ -16,7 +16,7 @@ SIMAPP = ./app
 HTTPS_GIT := https://github.com/UptickNetwork/uptick.git
 DOCKER := $(shell which docker)
 DOCKER_BUF := $(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace bufbuild/buf
-NAMESPACE := UptickNetworkhq
+NAMESPACE := uptickhq
 PROJECT := uptick
 DOCKER_IMAGE := $(NAMESPACE)/$(PROJECT)
 COMMIT_HASH := $(shell git rev-parse --short=7 HEAD)
