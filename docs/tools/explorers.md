@@ -18,12 +18,12 @@ Uptick offers two types block explorers: an EVM explorer and a Cosmos explorer. 
 
 ![Blockscout](./img/blockscout.png)
 
-The [Uptick EVM explorer](https://evm.uptick.org/) is the EVM explorer for Uptick. The EVM explorer allows users to view Uptick EVM activity such as smart contract creations, interactions, token transfers, and other types of transactions. Users can also view Uptick and ERC-20 token balances through the Uptick EVM Explorer
+The [Uptick EVM explorer](https://evm-explorer.testnet.uptick.network/) is the EVM explorer for Uptick. The EVM explorer allows users to view Uptick EVM activity such as smart contract creations, interactions, token transfers, and other types of transactions. Users can also view Uptick and ERC-20 token balances through the Uptick EVM Explorer
 
 ## Cosmos-based
 
-### Uptick Cosmos-based Explorer (Big Dipper)
+### Uptick Cosmos-based Explorer (Ping-hub)
 
 ![Big Dipper](./img/big_dipper.png)
 
-The [Uptick Cosmos-based explorer](https://explorer.uptick.org/) is the Cosmos explorer for Uptick. The Cosmos-based explorer allows users to view Uptick activity within the Cosmos ecosystem. This explorer allows users to query transactions, delegations, IBC token transfers, and other Cosmos-related Uptick activity. Users can also view tokeneconomics and governance data using the Uptick Cosmos-based explorer.
+The [Uptick Cosmos-based explorer](https://explorer.testnet.uptick.network/) is the Cosmos explorer for Uptick. The Cosmos-based explorer allows users to view Uptick activity within the Cosmos ecosystem. This explorer allows users to query transactions, delegations, IBC token transfers, and other Cosmos-related Uptick activity. Users can also view tokeneconomics and governance data using the Uptick Cosmos-based explorer.

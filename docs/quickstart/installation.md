@@ -60,16 +60,16 @@ You can build {{ $themeConfig.project.name }} using Docker by running:
 make build-docker
 ```
 
-The command above will create a docker container: `UptickNetworkhq/uptick:latest`. Now you can run `uptickd` in the container.
+The command above will create a docker container: `uptickhq/uptick:latest`. Now you can run `uptickd` in the container.
 
 ```bash
-docker run -it -p 26657:26657 -p 26656:26656 -v ~/.uptickd/:/root/.uptickd UptickNetworkhq/uptick:latest uptickd version
+docker run -it -p 26657:26657 -p 26656:26656 -v ~/.uptickd/:/root/.uptickd uptickhq/uptick:latest uptickd version
 
 # To initialize
-# docker run -it -p 26657:26657 -p 26656:26656 -v ~/.uptickd/:/root/.uptickd UptickNetworkhq/uptick:latest uptickd init test-chain --chain-id test_7776-2
+# docker run -it -p 26657:26657 -p 26656:26656 -v ~/.uptickd/:/root/.uptickd uptickhq/uptick:latest uptickd init test-chain --chain-id test_7776-2
 
 # To run
-# docker run -it -p 26657:26657 -p 26656:26656 -v ~/.uptickd/:/root/.uptickd UptickNetworkhq/uptick:latest uptickd start
+# docker run -it -p 26657:26657 -p 26656:26656 -v ~/.uptickd/:/root/.uptickd uptickhq/uptick:latest uptickd start
 ```
 
 ### Releases
