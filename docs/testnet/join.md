@@ -108,36 +108,35 @@ Use `sed` to include them into the configuration. You can also add them manually
 ```bash
 sed -i.bak -e "s/^persistent_peers *=.*/persistent_peers = \"$PEERS\"/" ~/.uptickd/config/config.toml
 ```
-
-## Run a Testnet Validator
-
-Claim your testnet {{ $themeConfig.project.testnet_denom }} on the [faucet](./faucet.md) using your validator account address and submit your validator account address:
-
-::: tip
-For more details on how to configure your validator, follow the validator [setup](./../guides/validators/setup.md) instructions.
-:::
-
-```bash
-uptickd tx staking create-validator \
-  --amount=5000000000000000000auptick \
-  --pubkey=$(uptickd tendermint show-validator) \
-  --moniker="UptickBuilder" \
-  --chain-id=<chain_id> \
-  --commission-rate="0.10" \
-  --commission-max-rate="0.20" \
-  --commission-max-change-rate="0.01" \
-  --min-self-delegation="1000000" \
-  --gas="auto" \
-  --gas-prices="0.025auptick" \
-  --from=<key_name>
-```
-
 ## Start testnet
 
 The final step is to [start the nodes](./../quickstart/run_node#start-node). Once enough voting power (+2/3) from the genesis validators is up-and-running, the testnet will start producing blocks.
 
 ```bash
 uptickd start
+```
+## Run a Testnet Validator
+
+Claim your testnet {{ $themeConfig.project.testnet_denom }} on the [faucet](./faucet.md) using your validator account address and submit your validator account address:
+> NOTE: Till `uptickd status 2>&1 | jq ."SyncInfo"."catching_up" ` got false , then create your validator ,or your validator may jailed. So you should use `uptickd tx slashing unjail --from <wallet name> --chain-id uptick_7776-1 -y -b block` to unjail your validator
+
+::: tip
+For more details on how to configure your validator, follow the validator [setup](./../guides/validators/setup.md) instructions.
+:::
+```bash
+uptickd tx staking create-validator \
+  --amount=5000000000000000000auptick \
+  --pubkey=$(uptickd tendermint show-validator) \
+  --moniker="UptickBuilder" \
+  --chain-id=uptick_7776-1 \
+  --commission-rate="0.10" \
+  --commission-max-rate="0.20" \
+  --commission-max-change-rate="0.01" \
+  --min-self-delegation="1000000" \
+  --gas="300000" \
+  --from=node0 \
+  -y \
+  -b block
 ```
 
 ## Upgrading Your Node

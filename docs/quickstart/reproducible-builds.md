@@ -26,11 +26,11 @@ Clone `uptick`:
 git clone git@github.com:UptickNetwork/uptick.git
 ```
 
-Checkout the commit, branch, or release tag you want to build (eg `v0.4.0`):
+Checkout the commit, branch, or release tag you want to build (eg `v0.1.0`):
 
 ```bash
 cd uptick/
-git checkout v0.4.0
+git checkout v0.1.0
 ```
 
 The buildsystem supports and produces binaries for the following architectures:
@@ -49,12 +49,12 @@ build sanity. An example of its contents follows:
 
 ```
 App: uptickd
-Version: 0.4.0
-Commit: b7e46982d1dc2d4c34fcd3b52f1edfd2e589d370
-Files:
- 7594279acff34ff18ea9d896d217a6db  uptickd-0.4.0-linux-amd64
- c083e812acbfa7d6e02583386b371b93  uptickd-0.4.0.tar.gz
+Version: 0.1.0
+Commit: d477e775a2596701ea215a4570e8ea9669d76edf
 Checksums-Sha256:
- d087053050ce888c21d26e40869105163c5521cb5b291443710961ac0c892e81  uptickd-0.4.0-linux-amd64
- 6ca3e5e40240f5e433088fd9b7370440f3f94116803934c21257e1c78fb9653d  uptickd-0.4.0.tar.gz
+  14ef10a820d492072f930e144aa330a21af5824fdb5c2fada442d5ec67864693  uptick_0.1.0_Darwin_x86_64.tar.gz
+  576c8a13d147ca63cd1de7ee9bbabcf6f70200189cafa31b19263d3bfae37183  uptick_0.1.0_Linux_x86_64.tar.gz
+  ad7bf8b237e7093478d1e2b49b3bb2a15154dc37869fa1ff98a474376bb9f07c  uptick_0.1.0_Linux_arm64.tar.gz
+  d03970de154ae2438f354b5d7b25b94a22d7daa3ba7107632c7c07f188d61715  uptick_0.1.0_Darwin_arm64.tar.gz
+  f8098bd12d1c9459158ec1dfd2a9a5cc4e41f960ed4de844216c65f19c803786  uptick_0.1.0_Windows_x86_64.zip
 ```

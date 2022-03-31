@@ -35,8 +35,8 @@ $ uptickd version --long
 
 name: uptick
 server_name: uptickd
-version: 0.4.0
-commit: 070b668f2cbbf52548c46e96b236e09884483dd4
+version: 0.1.0
+commit: d477e775a2596701ea215a4570e8ea9669d76edf
 build_tags: netgo,ledger
 go: go version go1.17 darwin/amd64
 ...
