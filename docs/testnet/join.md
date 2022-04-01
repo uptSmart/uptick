@@ -118,7 +118,7 @@ uptickd start
 ## Run a Testnet Validator
 
 Claim your testnet {{ $themeConfig.project.testnet_denom }} on the [faucet](./faucet.md) using your validator account address and submit your validator account address:
-> NOTE: Till `uptickd status 2>&1 | jq ."SyncInfo"."catching_up"` got false, create your validator. If your validator is jailed, unjail it with `uptickd tx slashing unjail --from <wallet name> --chain-id uptick_7776-1 -y -b block`.
+> NOTE: Until `uptickd status 2>&1 | jq ."SyncInfo"."catching_up"` got false, create your validator. If your validator is jailed, unjail it via `uptickd tx slashing unjail --from <wallet name> --chain-id uptick_7776-1 -y -b block`.
 
 ::: tip
 For more details on how to configure your validator, follow the validator [setup](./../guides/validators/setup.md) instructions.
