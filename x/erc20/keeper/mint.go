@@ -16,17 +16,17 @@ import (
 func (k Keeper) MintingEnabled(ctx sdk.Context, sender, receiver sdk.AccAddress, token string) (types.TokenPair, error) {
 	params := k.GetParams(ctx)
 	if !params.EnableErc20 {
-		return types.TokenPair{}, sdkerrors.Wrap(types.ErrERC20Disabled, "intrarelaying is currently disabled by governance")
+		return types.TokenPair{}, sdkerrors.Wrap(types.ErrERC20Disabled, "module is currently disabled by governance")
 	}
 
 	id := k.GetTokenPairID(ctx, token)
 	if len(id) == 0 {
-		return types.TokenPair{}, sdkerrors.Wrapf(types.ErrTokenPairNotFound, "token '%s' not registered", token)
+		return types.TokenPair{}, sdkerrors.Wrapf(types.ErrTokenPairNotFound, "token '%s' not registered by id", token)
 	}
 
 	pair, found := k.GetTokenPair(ctx, id)
 	if !found {
-		return types.TokenPair{}, sdkerrors.Wrapf(types.ErrTokenPairNotFound, "not registered")
+		return types.TokenPair{}, sdkerrors.Wrapf(types.ErrTokenPairNotFound, "token '%s' not registered", token)
 	}
 
 	if !pair.Enabled {

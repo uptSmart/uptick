@@ -126,7 +126,7 @@ func (k Keeper) convertCoinNativeCoin(
 	}
 
 	// Mint Tokens and send to receiver
-	_, err := k.CallEVM(ctx, erc20, types.ModuleAddress, contract, "mint", receiver, msg.Coin.Amount.BigInt())
+	_, err := k.CallEVM(ctx, erc20, types.ModuleAddress, contract, true, "mint", receiver, msg.Coin.Amount.BigInt())
 	if err != nil {
 		return nil, err
 	}
@@ -135,11 +135,11 @@ func (k Keeper) convertCoinNativeCoin(
 	tokens := msg.Coin.Amount.BigInt()
 	balanceTokenAfter := k.balanceOf(ctx, erc20, contract, receiver)
 	exp := big.NewInt(0).Add(balanceToken, tokens)
+
 	if r := balanceTokenAfter.Cmp(exp); r != 0 {
 		return nil, sdkerrors.Wrapf(
 			types.ErrBalanceInvariance,
-			"invalid token balance - expected: %v, actual: %v",
-			exp, balanceTokenAfter,
+			"invalid token balance - expected: %v, actual: %v", exp, balanceTokenAfter,
 		)
 	}
 
@@ -180,7 +180,7 @@ func (k Keeper) convertERC20NativeCoin(
 	balanceToken := k.balanceOf(ctx, erc20, contract, sender)
 
 	// Burn escrowed tokens
-	_, err := k.CallEVM(ctx, erc20, types.ModuleAddress, contract, "burnCoins", sender, msg.Amount.BigInt())
+	_, err := k.CallEVM(ctx, erc20, types.ModuleAddress, contract, true, "burnCoins", sender, msg.Amount.BigInt())
 	if err != nil {
 		return nil, err
 	}
@@ -189,6 +189,7 @@ func (k Keeper) convertERC20NativeCoin(
 	if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, receiver, coins); err != nil {
 		return nil, err
 	}
+
 	// Check expected Receiver balance after transfer execution
 	balanceCoinAfter := k.bankKeeper.GetBalance(ctx, receiver, pair.Denom)
 	expCoin := balanceCoin.Add(coins[0])
@@ -254,7 +255,8 @@ func (k Keeper) convertERC20NativeToken(
 	if err != nil {
 		return nil, err
 	}
-	res, err := k.CallEVMWithData(ctx, sender, &contract, transferData)
+
+	res, err := k.CallEVMWithData(ctx, sender, &contract, transferData, true)
 	if err != nil {
 		return nil, err
 	}
@@ -273,6 +275,7 @@ func (k Keeper) convertERC20NativeToken(
 	tokens := coins[0].Amount.BigInt()
 	balanceTokenAfter := k.balanceOf(ctx, erc20, contract, types.ModuleAddress)
 	expToken := big.NewInt(0).Add(balanceToken, tokens)
+
 	if r := balanceTokenAfter.Cmp(expToken); r != 0 {
 		return nil, sdkerrors.Wrapf(
 			types.ErrBalanceInvariance,
@@ -294,6 +297,7 @@ func (k Keeper) convertERC20NativeToken(
 	// Check expected Receiver balance after transfer execution
 	balanceCoinAfter := k.bankKeeper.GetBalance(ctx, receiver, pair.Denom)
 	expCoin := balanceCoin.Add(coins[0])
+
 	if ok := balanceCoinAfter.IsEqual(expCoin); !ok {
 		return nil, sdkerrors.Wrapf(
 			types.ErrBalanceInvariance,
@@ -350,7 +354,7 @@ func (k Keeper) convertCoinNativeERC20(
 	}
 
 	// Unescrow Tokens and send to receiver
-	res, err := k.CallEVM(ctx, erc20, types.ModuleAddress, contract, "transfer", receiver, msg.Coin.Amount.BigInt())
+	res, err := k.CallEVM(ctx, erc20, types.ModuleAddress, contract, true, "transfer", receiver, msg.Coin.Amount.BigInt())
 	if err != nil {
 		return nil, err
 	}
@@ -369,6 +373,7 @@ func (k Keeper) convertCoinNativeERC20(
 	tokens := msg.Coin.Amount.BigInt()
 	balanceTokenAfter := k.balanceOf(ctx, erc20, contract, receiver)
 	exp := big.NewInt(0).Add(balanceToken, tokens)
+
 	if r := balanceTokenAfter.Cmp(exp); r != 0 {
 		return nil, sdkerrors.Wrapf(
 			types.ErrBalanceInvariance,
@@ -410,7 +415,7 @@ func (k Keeper) balanceOf(
 	abi abi.ABI,
 	contract, account common.Address,
 ) *big.Int {
-	res, err := k.CallEVM(ctx, abi, types.ModuleAddress, contract, "balanceOf", account)
+	res, err := k.CallEVM(ctx, abi, types.ModuleAddress, contract, false, "balanceOf", account)
 	if err != nil {
 		return nil
 	}

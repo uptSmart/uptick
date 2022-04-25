@@ -2,13 +2,12 @@ package keeper
 
 import (
 	"bytes"
-	"fmt"
 	"math/big"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	evmtypes "github.com/tharsis/ethermint/x/evm/types"
 
@@ -28,19 +27,20 @@ func (k Keeper) Hooks() Hooks {
 	return Hooks{k}
 }
 
-// TODO: Make sure that if ConvertERC20 is called, that the Hook doesnt trigger
+// TODO: Make sure that if ConvertERC20 is called, that the Hook doesn't trigger
 // if it does, delete minting from ConvertErc20
 
 // PostTxProcessing implements EvmHooks.PostTxProcessing
 func (h Hooks) PostTxProcessing(
 	ctx sdk.Context,
-	from common.Address,
-	to *common.Address,
+	msg core.Message,
 	receipt *ethtypes.Receipt,
 ) error {
 	params := h.k.GetParams(ctx)
-	if !params.EnableEVMHook {
-		return sdkerrors.Wrap(types.ErrInternalTokenPair, "EVM Hook is currently disabled")
+	if !params.EnableErc20 || !params.EnableEVMHook {
+		// no error is returned to allow for other post processing txs
+		// to pass
+		return nil
 	}
 
 	erc20 := contracts.ERC20BurnableContract.ABI
@@ -94,9 +94,14 @@ func (h Hooks) PostTxProcessing(
 			continue
 		}
 
-		// check that relaying for the pair is enabled
+		// check that conversion for the pair is enabled
 		if !pair.Enabled {
-			return fmt.Errorf("internal relaying is disabled for pair %s, please create a governance proposal", contractAddr) // convert to SDK error
+			// continue to allow transfers for the ERC20 in case the token pair is disabled
+			h.k.Logger(ctx).Debug(
+				"ERC20 token -> Cosmos coin conversion is disabled for pair",
+				"coin", pair.Denom, "contract", pair.Erc20Address,
+			)
+			continue
 		}
 
 		// ignore as the burning always transfers to the zero address
@@ -114,7 +119,7 @@ func (h Hooks) PostTxProcessing(
 		// Mint the coin only if ERC20 is external
 		switch pair.ContractOwner {
 		case types.OWNER_MODULE:
-			_, err = h.k.CallEVM(ctx, erc20, types.ModuleAddress, contractAddr, "burn", tokens)
+			_, err = h.k.CallEVM(ctx, erc20, types.ModuleAddress, contractAddr, true, "burn", tokens)
 		case types.OWNER_EXTERNAL:
 			err = h.k.bankKeeper.MintCoins(ctx, types.ModuleName, coins)
 		default:

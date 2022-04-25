@@ -82,7 +82,8 @@ func GetCmdIssueDenom() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			optionsContent, err := ioutil.ReadFile(schema)
+
+			optionsContent, err := ioutil.ReadFile(schema) //#nosec
 			if err == nil {
 				schema = string(optionsContent)
 			}
