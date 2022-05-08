@@ -161,6 +161,7 @@ var (
 			ibcclientclient.UpgradeProposalHandler,
 			// Uptick proposal types
 			erc20client.RegisterCoinProposalHandler,
+			erc20client.AddCoinProposalHandler,
 			erc20client.RegisterERC20ProposalHandler,
 			erc20client.ToggleTokenRelayProposalHandler,
 			erc20client.UpdateTokenPairERC20ProposalHandler,
@@ -254,7 +255,7 @@ type Uptick struct {
 	FeeMarketKeeper feemarketkeeper.Keeper
 
 	// Uptick keepers
-	Erc20Keeper      erc20keeper.Keeper
+	Erc20Keeper      *erc20keeper.Keeper
 	NFTKeeper        nftkeeper.Keeper
 	CollectionKeeper collectionkeeper.Keeper
 
@@ -410,6 +411,10 @@ func NewUptick(
 		appCodec, keys[ibchost.StoreKey], app.GetSubspace(ibchost.ModuleName), app.StakingKeeper, app.UpgradeKeeper, scopedIBCKeeper,
 	)
 
+	// Uptick Keeper
+	app.Erc20Keeper = erc20keeper.NewKeeper(
+		keys[erc20types.StoreKey], appCodec, app.GetSubspace(erc20types.ModuleName), app.AccountKeeper, app.BankKeeper, app.EvmKeeper,
+	)
 	// register the proposal types
 	govRouter := govtypes.NewRouter()
 	govRouter.AddRoute(govtypes.RouterKey, govtypes.ProposalHandler).
@@ -417,16 +422,11 @@ func NewUptick(
 		AddRoute(distrtypes.RouterKey, distr.NewCommunityPoolSpendProposalHandler(app.DistrKeeper)).
 		AddRoute(upgradetypes.RouterKey, upgrade.NewSoftwareUpgradeProposalHandler(app.UpgradeKeeper)).
 		AddRoute(ibchost.RouterKey, ibcclient.NewClientProposalHandler(app.IBCKeeper.ClientKeeper)).
-		AddRoute(erc20types.RouterKey, erc20.NewErc20ProposalHandler(&app.Erc20Keeper))
+		AddRoute(erc20types.RouterKey, erc20.NewErc20ProposalHandler(app.Erc20Keeper))
 
 	govKeeper := govkeeper.NewKeeper(
 		appCodec, keys[govtypes.StoreKey], app.GetSubspace(govtypes.ModuleName), app.AccountKeeper, app.BankKeeper,
 		&stakingKeeper, govRouter,
-	)
-
-	// Uptick Keeper
-	app.Erc20Keeper = erc20keeper.NewKeeper(
-		keys[erc20types.StoreKey], appCodec, app.GetSubspace(erc20types.ModuleName), app.AccountKeeper, app.BankKeeper, app.EvmKeeper,
 	)
 
 	app.GovKeeper = *govKeeper.SetHooks(
@@ -441,16 +441,26 @@ func NewUptick(
 
 	// Create Transfer Keepers
 	app.TransferKeeper = ibctransferkeeper.NewKeeper(
-		appCodec, keys[ibctransfertypes.StoreKey], app.GetSubspace(ibctransfertypes.ModuleName),
-		app.IBCKeeper.ChannelKeeper, app.IBCKeeper.ChannelKeeper, &app.IBCKeeper.PortKeeper, // FIXME: implement middleware
-		app.AccountKeeper, app.BankKeeper, scopedTransferKeeper,
+		appCodec,
+		keys[ibctransfertypes.StoreKey],
+		app.GetSubspace(ibctransfertypes.ModuleName),
+		app.Erc20Keeper, // ICS4 Wrapper: IBC middleware
+		app.IBCKeeper.ChannelKeeper,
+		&app.IBCKeeper.PortKeeper,
+		app.AccountKeeper,
+		app.BankKeeper,
+		scopedTransferKeeper,
 	)
+	app.Erc20Keeper.SetICS4Wrapper(app.IBCKeeper.ChannelKeeper)
+
 	transferModule := transfer.NewAppModule(app.TransferKeeper)
 	transferIBCModule := transfer.NewIBCModule(app.TransferKeeper)
+	// create IBC module from bottom to top of stack
+	transferStack := erc20.NewIBCMiddleware(*app.Erc20Keeper, transferIBCModule)
 
 	// Create static IBC router, add transfer route, then set and seal it
 	ibcRouter := porttypes.NewRouter()
-	ibcRouter.AddRoute(ibctransfertypes.ModuleName, transferIBCModule)
+	ibcRouter.AddRoute(ibctransfertypes.ModuleName, transferStack)
 	app.IBCKeeper.SetRouter(ibcRouter)
 
 	app.NFTKeeper = nftkeeper.NewKeeper(keys[nftkeeper.StoreKey], appCodec, app.AccountKeeper, app.BankKeeper)
@@ -500,7 +510,7 @@ func NewUptick(
 		evm.NewAppModule(app.EvmKeeper, app.AccountKeeper),
 		feemarket.NewAppModule(app.FeeMarketKeeper),
 		// Uptick app modules
-		erc20.NewAppModule(app.Erc20Keeper, app.AccountKeeper),
+		erc20.NewAppModule(*app.Erc20Keeper, app.AccountKeeper),
 		nftmodule.NewAppModule(appCodec, app.NFTKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
 		collection.NewAppModule(app.appCodec, app.CollectionKeeper, app.AccountKeeper, app.BankKeeper),
 	)

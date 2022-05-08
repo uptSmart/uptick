@@ -196,31 +196,25 @@ func (suite *KeeperTestSuite) MintFeeCollector(coins sdk.Coins) {
 }
 
 // DeployContract deploys the ERC20MinterBurnerDecimalsContract.
-func (suite *KeeperTestSuite) DeployContract(name, symbol string, decimals uint8) (common.Address, error) {
+func (suite *KeeperTestSuite) DeployContract(name, symbol string, decimals uint8) common.Address {
 	ctx := sdk.WrapSDKContext(suite.ctx)
 	chainID := suite.app.EvmKeeper.ChainID()
 
 	ctorArgs, err := contracts.ERC20MinterBurnerDecimalsContract.ABI.Pack("", name, symbol, decimals)
-	if err != nil {
-		return common.Address{}, err
-	}
+	suite.Require().NoError(err)
 
 	data := append(contracts.ERC20MinterBurnerDecimalsContract.Bin, ctorArgs...)
 	args, err := json.Marshal(&evm.TransactionArgs{
 		From: &suite.address,
 		Data: (*hexutil.Bytes)(&data),
 	})
-	if err != nil {
-		return common.Address{}, err
-	}
+	suite.Require().NoError(err)
 
 	res, err := suite.queryClientEvm.EstimateGas(ctx, &evm.EthCallRequest{
 		Args:   args,
 		GasCap: uint64(config.DefaultGasCap),
 	})
-	if err != nil {
-		return common.Address{}, err
-	}
+	suite.Require().NoError(err)
 
 	nonce := suite.app.EvmKeeper.GetNonce(suite.ctx, suite.address)
 
@@ -238,17 +232,13 @@ func (suite *KeeperTestSuite) DeployContract(name, symbol string, decimals uint8
 
 	erc20DeployTx.From = suite.address.Hex()
 	err = erc20DeployTx.Sign(ethtypes.LatestSignerForChainID(chainID), suite.signer)
-	if err != nil {
-		return common.Address{}, err
-	}
+	suite.Require().NoError(err)
 
 	rsp, err := suite.app.EvmKeeper.EthereumTx(ctx, erc20DeployTx)
-	if err != nil {
-		return common.Address{}, err
-	}
+	suite.Require().NoError(err)
 
 	suite.Require().Empty(rsp.VmError)
-	return crypto.CreateAddress(suite.address, nonce), nil
+	return crypto.CreateAddress(suite.address, nonce)
 }
 
 func (suite *KeeperTestSuite) DeployContractMaliciousDelayed(name string, symbol string) common.Address {

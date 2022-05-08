@@ -25,7 +25,7 @@ func (suite *KeeperTestSuite) TestQueryERC20() {
 		},
 		{
 			"ok",
-			func() { contract, _ = suite.DeployContract("coin", "token", erc20Decimals) },
+			func() { contract = suite.DeployContract("coin", "token", erc20Decimals) },
 			true,
 		},
 	}
@@ -68,8 +68,7 @@ func (suite *KeeperTestSuite) TestCallEVM() {
 		suite.SetupTest() // reset
 
 		erc20 := contracts.ERC20MinterBurnerDecimalsContract.ABI
-		contract, err := suite.DeployContract("coin", "token", erc20Decimals)
-		suite.Require().NoError(err)
+		contract := suite.DeployContract("coin", "token", erc20Decimals)
 		account := tests.GenerateAddress()
 
 		res, err := suite.app.Erc20Keeper.CallEVM(suite.ctx, erc20, types.ModuleAddress, contract, true, tc.method, account)
@@ -94,8 +93,7 @@ func (suite *KeeperTestSuite) TestCallEVMWithData() {
 			"unknown method",
 			types.ModuleAddress,
 			func() ([]byte, *common.Address) {
-				contract, err := suite.DeployContract("coin", "token", erc20Decimals)
-				suite.Require().NoError(err)
+				contract := suite.DeployContract("coin", "token", erc20Decimals)
 				account := tests.GenerateAddress()
 				data, _ := erc20.Pack("", account)
 				return data, &contract
@@ -106,8 +104,7 @@ func (suite *KeeperTestSuite) TestCallEVMWithData() {
 			"pass",
 			types.ModuleAddress,
 			func() ([]byte, *common.Address) {
-				contract, err := suite.DeployContract("coin", "token", erc20Decimals)
-				suite.Require().NoError(err)
+				contract := suite.DeployContract("coin", "token", erc20Decimals)
 				account := tests.GenerateAddress()
 				data, _ := erc20.Pack("balanceOf", account)
 				return data, &contract
@@ -118,8 +115,7 @@ func (suite *KeeperTestSuite) TestCallEVMWithData() {
 			"fail empty data",
 			types.ModuleAddress,
 			func() ([]byte, *common.Address) {
-				contract, err := suite.DeployContract("coin", "token", erc20Decimals)
-				suite.Require().NoError(err)
+				contract := suite.DeployContract("coin", "token", erc20Decimals)
 				return []byte{}, &contract
 			},
 			false,
@@ -129,8 +125,7 @@ func (suite *KeeperTestSuite) TestCallEVMWithData() {
 			"fail empty sender",
 			common.Address{},
 			func() ([]byte, *common.Address) {
-				contract, err := suite.DeployContract("coin", "token", erc20Decimals)
-				suite.Require().NoError(err)
+				contract := suite.DeployContract("coin", "token", erc20Decimals)
 				return []byte{}, &contract
 			},
 			false,

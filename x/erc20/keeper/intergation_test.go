@@ -2,7 +2,6 @@ package keeper_test
 
 import (
 	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("Performing EVM transactions", Ordered, func() {
@@ -25,8 +24,7 @@ var _ = Describe("Performing EVM transactions", Ordered, func() {
 			s.app.Erc20Keeper.SetParams(s.ctx, params)
 		})
 		It("should be successful", func() {
-			_, err := s.DeployContract("coin", "token", erc20Decimals)
-			Expect(err).To(BeNil())
+			_ = s.DeployContract("coin", "token", erc20Decimals)
 		})
 	})
 
@@ -37,8 +35,7 @@ var _ = Describe("Performing EVM transactions", Ordered, func() {
 			s.app.Erc20Keeper.SetParams(s.ctx, params)
 		})
 		It("should be successful", func() {
-			_, err := s.DeployContract("coin", "token", erc20Decimals)
-			Expect(err).To(BeNil())
+			_ = s.DeployContract("coin", "token", erc20Decimals)
 		})
 	})
 
@@ -49,15 +46,13 @@ var _ = Describe("Performing EVM transactions", Ordered, func() {
 			s.app.Erc20Keeper.SetParams(s.ctx, params)
 		})
 		It("should be successful", func() {
-			_, err := s.DeployContract("coin", "token", erc20Decimals)
-			Expect(err).To(BeNil())
+			_ = s.DeployContract("coin", "token", erc20Decimals)
 		})
 	})
 
 	Context("with the ERC20 module and EVM Hook enabled", func() {
 		It("should be successful", func() {
-			_, err := s.DeployContract("coin", "token", erc20Decimals)
-			Expect(err).To(BeNil())
+			_ = s.DeployContract("coin", "token", erc20Decimals)
 		})
 	})
 })

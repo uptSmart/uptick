@@ -114,7 +114,7 @@ func NewRootCmd() (*cobra.Command, params.EncodingConfig) {
 		AddGenesisAccountCmd(app.DefaultNodeHome),
 		tmcli.NewCompletionCmd(rootCmd, true),
 		NewTestnetCmd(app.ModuleBasics, banktypes.GenesisBalancesIterator{}),
-		debug.Cmd(),
+		AddIbcCaclulateCommand(debug.Cmd()),
 		config.Cmd(),
 	)
 

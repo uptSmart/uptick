@@ -1,18 +1,10 @@
 package keeper
 
 import (
-	"bytes"
-	"math/big"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
-
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	evmtypes "github.com/tharsis/ethermint/x/evm/types"
-
-	"github.com/UptickNetwork/uptick/contracts"
-	"github.com/UptickNetwork/uptick/x/erc20/types"
 )
 
 // Hooks wrapper struct for erc20 keeper
@@ -36,7 +28,7 @@ func (h Hooks) PostTxProcessing(
 	msg core.Message,
 	receipt *ethtypes.Receipt,
 ) error {
-	params := h.k.GetParams(ctx)
+	/* params := h.k.GetParams(ctx)
 	if !params.EnableErc20 || !params.EnableEVMHook {
 		// no error is returned to allow for other post processing txs
 		// to pass
@@ -147,7 +139,7 @@ func (h Hooks) PostTxProcessing(
 			)
 			continue
 		}
-	}
+	} */
 
 	return nil
 }

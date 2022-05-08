@@ -30,7 +30,7 @@ func (k Keeper) ConvertCoin(
 	receiver := common.HexToAddress(msg.Receiver)
 	sender, _ := sdk.AccAddressFromBech32(msg.Sender)
 
-	pair, err := k.MintingEnabled(ctx, sender, receiver.Bytes(), msg.Coin.Denom)
+	pair, err := k.MintingEnabled(ctx, sender, receiver.Bytes(), msg.Coin.Denom, msg.Coin.Denom)
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +72,7 @@ func (k Keeper) ConvertERC20(
 	receiver, _ := sdk.AccAddressFromBech32(msg.Receiver)
 	sender := common.HexToAddress(msg.Sender)
 
-	pair, err := k.MintingEnabled(ctx, sender.Bytes(), receiver, msg.ContractAddress)
+	pair, err := k.MintingEnabled(ctx, sender.Bytes(), receiver, msg.ContractAddress, msg.Denom)
 	if err != nil {
 		return nil, err
 	}
@@ -172,11 +172,11 @@ func (k Keeper) convertERC20NativeCoin(
 	sender common.Address,
 ) (*types.MsgConvertERC20Response, error) {
 	// NOTE: coin fields already validated
-	coins := sdk.Coins{sdk.Coin{Denom: pair.Denom, Amount: msg.Amount}}
+	coins := sdk.Coins{sdk.Coin{Denom: msg.Denom, Amount: msg.Amount}}
 
 	erc20 := contracts.ERC20MinterBurnerDecimalsContract.ABI
 	contract := pair.GetERC20Contract()
-	balanceCoin := k.bankKeeper.GetBalance(ctx, receiver, pair.Denom)
+	balanceCoin := k.bankKeeper.GetBalance(ctx, receiver, msg.Denom)
 	balanceToken := k.balanceOf(ctx, erc20, contract, sender)
 
 	// Burn escrowed tokens
@@ -189,10 +189,10 @@ func (k Keeper) convertERC20NativeCoin(
 	if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, receiver, coins); err != nil {
 		return nil, err
 	}
-
 	// Check expected Receiver balance after transfer execution
-	balanceCoinAfter := k.bankKeeper.GetBalance(ctx, receiver, pair.Denom)
+	balanceCoinAfter := k.bankKeeper.GetBalance(ctx, receiver, msg.Denom)
 	expCoin := balanceCoin.Add(coins[0])
+
 	if ok := balanceCoinAfter.IsEqual(expCoin); !ok {
 		return nil, sdkerrors.Wrapf(
 			types.ErrBalanceInvariance,
@@ -205,6 +205,7 @@ func (k Keeper) convertERC20NativeCoin(
 	tokens := coins[0].Amount.BigInt()
 	balanceTokenAfter := k.balanceOf(ctx, erc20, contract, sender)
 	expToken := big.NewInt(0).Sub(balanceToken, tokens)
+
 	if r := balanceTokenAfter.Cmp(expToken); r != 0 {
 		return nil, sdkerrors.Wrapf(
 			types.ErrBalanceInvariance,
@@ -220,7 +221,7 @@ func (k Keeper) convertERC20NativeCoin(
 				sdk.NewAttribute(sdk.AttributeKeySender, msg.Sender),
 				sdk.NewAttribute(types.AttributeKeyReceiver, msg.Receiver),
 				sdk.NewAttribute(sdk.AttributeKeyAmount, msg.Amount.String()),
-				sdk.NewAttribute(types.AttributeKeyCosmosCoin, pair.Denom),
+				sdk.NewAttribute(types.AttributeKeyCosmosCoin, msg.Denom),
 				sdk.NewAttribute(types.AttributeKeyERC20Token, msg.ContractAddress),
 			),
 		},
@@ -244,10 +245,10 @@ func (k Keeper) convertERC20NativeToken(
 	sender common.Address,
 ) (*types.MsgConvertERC20Response, error) {
 	// NOTE: coin fields already validated
-	coins := sdk.Coins{sdk.Coin{Denom: pair.Denom, Amount: msg.Amount}}
+	coins := sdk.Coins{sdk.Coin{Denom: msg.Denom, Amount: msg.Amount}}
 	erc20 := contracts.ERC20MinterBurnerDecimalsContract.ABI
 	contract := pair.GetERC20Contract()
-	balanceCoin := k.bankKeeper.GetBalance(ctx, receiver, pair.Denom)
+	balanceCoin := k.bankKeeper.GetBalance(ctx, receiver, msg.Denom)
 	balanceToken := k.balanceOf(ctx, erc20, contract, types.ModuleAddress)
 
 	// Escrow tokens on module account
@@ -270,7 +271,6 @@ func (k Keeper) convertERC20NativeToken(
 	if !unpackedRet.Value {
 		return nil, sdkerrors.Wrap(sdkerrors.ErrLogic, "failed to execute transfer")
 	}
-
 	// Check expected escrow balance after transfer execution
 	tokens := coins[0].Amount.BigInt()
 	balanceTokenAfter := k.balanceOf(ctx, erc20, contract, types.ModuleAddress)
@@ -295,7 +295,7 @@ func (k Keeper) convertERC20NativeToken(
 	}
 
 	// Check expected Receiver balance after transfer execution
-	balanceCoinAfter := k.bankKeeper.GetBalance(ctx, receiver, pair.Denom)
+	balanceCoinAfter := k.bankKeeper.GetBalance(ctx, receiver, msg.Denom)
 	expCoin := balanceCoin.Add(coins[0])
 
 	if ok := balanceCoinAfter.IsEqual(expCoin); !ok {
@@ -318,7 +318,7 @@ func (k Keeper) convertERC20NativeToken(
 				sdk.NewAttribute(sdk.AttributeKeySender, msg.Sender),
 				sdk.NewAttribute(types.AttributeKeyReceiver, msg.Receiver),
 				sdk.NewAttribute(sdk.AttributeKeyAmount, msg.Amount.String()),
-				sdk.NewAttribute(types.AttributeKeyCosmosCoin, pair.Denom),
+				sdk.NewAttribute(types.AttributeKeyCosmosCoin, msg.Denom),
 				sdk.NewAttribute(types.AttributeKeyERC20Token, msg.ContractAddress),
 			),
 		},

@@ -26,7 +26,6 @@ for dir in $proto_dirs; do
         --gocosmos_out=plugins=interfacetype+grpc,Mgoogle/protobuf/any.proto=github.com/cosmos/cosmos-sdk/codec/types:. \
         --grpc-gateway_out=logtostderr=true:. \
         $(find "${dir}" -maxdepth 1 -name '*.proto')
-
 done
 
 # command to generate docs using protoc-gen-doc
