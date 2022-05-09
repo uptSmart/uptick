@@ -954,10 +954,10 @@ func (app *Uptick) registerUpgradeHandlers() {
 
 	var storeUpgrades *storetypes.StoreUpgrades
 
-	switch upgradeInfo.Name {
-	case "v0.2":
-		// no store upgrades in v0.2
-	}
+	// switch upgradeInfo.Name {
+	// case "v0.2":
+	// 	// no store upgrades in v0.2
+	// }
 
 	if storeUpgrades != nil {
 		// configure store loader that checks if version == upgradeHeight and applies store upgrades
