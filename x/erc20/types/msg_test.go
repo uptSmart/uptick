@@ -140,13 +140,16 @@ func (suite *MsgsTestSuite) TestMsgConvertCoin() {
 }
 
 func (suite *MsgsTestSuite) TestMsgConvertERC20Getters() {
+	msgInvalid := MsgConvertERC20{}
 	msg := NewMsgConvertERC20(
 		sdk.NewInt(100),
 		sdk.AccAddress(tests.GenerateAddress().Bytes()),
 		tests.GenerateAddress(),
 		tests.GenerateAddress(),
-		"test",
 	)
+	suite.Require().Equal(RouterKey, msg.Route())
+	suite.Require().Equal(TypeMsgConvertERC20, msg.Type())
+	suite.Require().NotNil(msgInvalid.GetSignBytes())
 	suite.Require().NotNil(msg.GetSigners())
 }
 
@@ -157,7 +160,6 @@ func (suite *MsgsTestSuite) TestMsgConvertERC20New() {
 		receiver   sdk.AccAddress
 		contract   common.Address
 		sender     common.Address
-		denom      string
 		expectPass bool
 	}{
 		{
@@ -166,13 +168,12 @@ func (suite *MsgsTestSuite) TestMsgConvertERC20New() {
 			sdk.AccAddress(tests.GenerateAddress().Bytes()),
 			tests.GenerateAddress(),
 			tests.GenerateAddress(),
-			"denom",
 			true,
 		},
 	}
 
 	for i, tc := range testCases {
-		tx := NewMsgConvertERC20(tc.amount, tc.receiver, tc.contract, tc.sender, tc.denom)
+		tx := NewMsgConvertERC20(tc.amount, tc.receiver, tc.contract, tc.sender)
 		err := tx.ValidateBasic()
 
 		if tc.expectPass {
@@ -190,7 +191,6 @@ func (suite *MsgsTestSuite) TestMsgConvertERC20() {
 		receiver   string
 		contract   string
 		sender     string
-		denom      string
 		expectPass bool
 	}{
 		{
@@ -199,7 +199,6 @@ func (suite *MsgsTestSuite) TestMsgConvertERC20() {
 			sdk.AccAddress(tests.GenerateAddress().Bytes()).String(),
 			sdk.AccAddress{}.String(),
 			tests.GenerateAddress().String(),
-			"test",
 			false,
 		},
 		{
@@ -208,7 +207,6 @@ func (suite *MsgsTestSuite) TestMsgConvertERC20() {
 			sdk.AccAddress(tests.GenerateAddress().Bytes()).String(),
 			tests.GenerateAddress().String(),
 			tests.GenerateAddress().String(),
-			"test",
 			false,
 		},
 		{
@@ -217,7 +215,6 @@ func (suite *MsgsTestSuite) TestMsgConvertERC20() {
 			sdk.AccAddress{}.String(),
 			tests.GenerateAddress().String(),
 			tests.GenerateAddress().String(),
-			"test",
 			false,
 		},
 		{
@@ -226,7 +223,6 @@ func (suite *MsgsTestSuite) TestMsgConvertERC20() {
 			sdk.AccAddress(tests.GenerateAddress().Bytes()).String(),
 			tests.GenerateAddress().String(),
 			sdk.AccAddress{}.String(),
-			"test",
 			false,
 		},
 		{
@@ -235,13 +231,12 @@ func (suite *MsgsTestSuite) TestMsgConvertERC20() {
 			sdk.AccAddress(tests.GenerateAddress().Bytes()).String(),
 			tests.GenerateAddress().String(),
 			tests.GenerateAddress().String(),
-			"test",
 			true,
 		},
 	}
 
 	for i, tc := range testCases {
-		tx := MsgConvertERC20{tc.contract, tc.amount, tc.receiver, tc.sender, tc.denom}
+		tx := MsgConvertERC20{tc.contract, tc.amount, tc.receiver, tc.sender}
 		err := tx.ValidateBasic()
 
 		if tc.expectPass {

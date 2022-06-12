@@ -18,8 +18,6 @@ func NewErc20ProposalHandler(k *keeper.Keeper) govtypes.Handler {
 		switch c := content.(type) {
 		case *types.RegisterCoinProposal:
 			return handleRegisterCoinProposal(ctx, k, c)
-		case *types.AddCoinProposal:
-			return handleAddCoinProposal(ctx, k, c)
 		case *types.RegisterERC20Proposal:
 			return handleRegisterERC20Proposal(ctx, k, c)
 		case *types.ToggleTokenRelayProposal:
@@ -38,23 +36,14 @@ func handleRegisterCoinProposal(ctx sdk.Context, k *keeper.Keeper, p *types.Regi
 	if err != nil {
 		return err
 	}
-	err = ctx.EventManager().EmitTypedEvent(&types.EventRegisterTokens{Denom: pair.Denoms, Erc20Token: pair.Erc20Address})
-	if err != nil {
-		return err
-	}
-	return nil
-}
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypeRegisterCoin,
+			sdk.NewAttribute(types.AttributeKeyCosmosCoin, pair.Denom),
+			sdk.NewAttribute(types.AttributeKeyERC20Token, pair.Erc20Address),
+		),
+	)
 
-func handleAddCoinProposal(ctx sdk.Context, k *keeper.Keeper, p *types.AddCoinProposal) error {
-	pair, err := k.AddCoin(ctx, p.Metadata, p.ContractAddress)
-	if err != nil {
-		return err
-	}
-
-	err = ctx.EventManager().EmitTypedEvent(&types.EventRegisterTokens{Denom: pair.Denoms, Erc20Token: pair.Erc20Address})
-	if err != nil {
-		return err
-	}
 	return nil
 }
 
@@ -63,10 +52,13 @@ func handleRegisterERC20Proposal(ctx sdk.Context, k *keeper.Keeper, p *types.Reg
 	if err != nil {
 		return err
 	}
-	err = ctx.EventManager().EmitTypedEvent(&types.EventRegisterTokens{Denom: pair.Denoms, Erc20Token: pair.Erc20Address})
-	if err != nil {
-		return err
-	}
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypeRegisterERC20,
+			sdk.NewAttribute(types.AttributeKeyCosmosCoin, pair.Denom),
+			sdk.NewAttribute(types.AttributeKeyERC20Token, pair.Erc20Address),
+		),
+	)
 
 	return nil
 }
@@ -77,10 +69,13 @@ func handleToggleRelayProposal(ctx sdk.Context, k *keeper.Keeper, p *types.Toggl
 		return err
 	}
 
-	err = ctx.EventManager().EmitTypedEvent(&types.EventRegisterTokens{Denom: pair.Denoms, Erc20Token: pair.Erc20Address})
-	if err != nil {
-		return err
-	}
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypeToggleTokenRelay,
+			sdk.NewAttribute(types.AttributeKeyCosmosCoin, pair.Denom),
+			sdk.NewAttribute(types.AttributeKeyERC20Token, pair.Erc20Address),
+		),
+	)
 
 	return nil
 }
@@ -91,9 +86,13 @@ func handleUpdateTokenPairERC20Proposal(ctx sdk.Context, k *keeper.Keeper, p *ty
 		return err
 	}
 
-	err = ctx.EventManager().EmitTypedEvent(&types.EventRegisterTokens{Denom: pair.Denoms, Erc20Token: pair.Erc20Address})
-	if err != nil {
-		return err
-	}
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypeUpdateTokenPairERC20,
+			sdk.NewAttribute(types.AttributeKeyCosmosCoin, pair.Denom),
+			sdk.NewAttribute(types.AttributeKeyERC20Token, pair.Erc20Address),
+		),
+	)
+
 	return nil
 }

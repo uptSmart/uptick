@@ -50,7 +50,7 @@ func (suite *GenesisTestSuite) TestValidateGenesis() {
 				TokenPairs: []TokenPair{
 					{
 						Erc20Address: "0xdac17f958d2ee523a2206206994597c13d831ec7",
-						Denoms:       []string{"usdt"},
+						Denom:        "usdt",
 						Enabled:      true,
 					},
 				},
@@ -64,31 +64,12 @@ func (suite *GenesisTestSuite) TestValidateGenesis() {
 				TokenPairs: []TokenPair{
 					{
 						Erc20Address: "0xdac17f958d2ee523a2206206994597c13d831ec7",
-						Denoms:       []string{"usdt"},
+						Denom:        "usdt",
 						Enabled:      true,
 					},
 					{
 						Erc20Address: "0xdac17f958d2ee523a2206206994597c13d831ec7",
-						Denoms:       []string{"usdt"},
-						Enabled:      true,
-					},
-				},
-			},
-			expPass: false,
-		},
-		{
-			name: "invalid genesis - duplicated token pair",
-			genState: &GenesisState{
-				Params: DefaultParams(),
-				TokenPairs: []TokenPair{
-					{
-						Erc20Address: "0xdac17f958d2ee523a2206206994597c13d831ec7",
-						Denoms:       []string{"usdt"},
-						Enabled:      true,
-					},
-					{
-						Erc20Address: "0xdac17f958d2ee523a2206206994597c13d831ec7",
-						Denoms:       []string{"usdt2"},
+						Denom:        "usdt",
 						Enabled:      true,
 					},
 				},
@@ -102,12 +83,31 @@ func (suite *GenesisTestSuite) TestValidateGenesis() {
 				TokenPairs: []TokenPair{
 					{
 						Erc20Address: "0xdac17f958d2ee523a2206206994597c13d831ec7",
-						Denoms:       []string{"usdt"},
+						Denom:        "usdt",
+						Enabled:      true,
+					},
+					{
+						Erc20Address: "0xdac17f958d2ee523a2206206994597c13d831ec7",
+						Denom:        "usdt2",
+						Enabled:      true,
+					},
+				},
+			},
+			expPass: false,
+		},
+		{
+			name: "invalid genesis - duplicated token pair",
+			genState: &GenesisState{
+				Params: DefaultParams(),
+				TokenPairs: []TokenPair{
+					{
+						Erc20Address: "0xdac17f958d2ee523a2206206994597c13d831ec7",
+						Denom:        "usdt",
 						Enabled:      true,
 					},
 					{
 						Erc20Address: "0xB8c77482e45F1F44dE1745F52C74426C631bDD52",
-						Denoms:       []string{"usdt"},
+						Denom:        "usdt",
 						Enabled:      true,
 					},
 				},
@@ -121,7 +121,7 @@ func (suite *GenesisTestSuite) TestValidateGenesis() {
 				TokenPairs: []TokenPair{
 					{
 						Erc20Address: "0xinvalidaddress",
-						Denoms:       []string{"bad"},
+						Denom:        "bad",
 						Enabled:      true,
 					},
 				},

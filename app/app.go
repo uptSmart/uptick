@@ -163,7 +163,6 @@ var (
 			ibcclientclient.UpgradeProposalHandler,
 			// Uptick proposal types
 			erc20client.RegisterCoinProposalHandler,
-			erc20client.AddCoinProposalHandler,
 			erc20client.RegisterERC20ProposalHandler,
 			erc20client.ToggleTokenRelayProposalHandler,
 			erc20client.UpdateTokenPairERC20ProposalHandler,

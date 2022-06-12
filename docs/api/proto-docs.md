@@ -49,7 +49,6 @@
     - [Msg](#uptick.collection.v1.Msg)
   
 - [uptick/erc20/v1/erc20.proto](#uptick/erc20/v1/erc20.proto)
-    - [AddCoinProposal](#uptick.erc20.v1.AddCoinProposal)
     - [RegisterCoinProposal](#uptick.erc20.v1.RegisterCoinProposal)
     - [RegisterERC20Proposal](#uptick.erc20.v1.RegisterERC20Proposal)
     - [ToggleTokenRelayProposal](#uptick.erc20.v1.ToggleTokenRelayProposal)
@@ -57,12 +56,6 @@
     - [UpdateTokenPairERC20Proposal](#uptick.erc20.v1.UpdateTokenPairERC20Proposal)
   
     - [Owner](#uptick.erc20.v1.Owner)
-  
-- [uptick/erc20/v1/event.proto](#uptick/erc20/v1/event.proto)
-    - [EventIBCERC20](#uptick.erc20.v1.EventIBCERC20)
-    - [EventRegisterTokens](#uptick.erc20.v1.EventRegisterTokens)
-  
-    - [Status](#uptick.erc20.v1.Status)
   
 - [uptick/erc20/v1/genesis.proto](#uptick/erc20/v1/genesis.proto)
     - [GenesisState](#uptick.erc20.v1.GenesisState)
@@ -733,24 +726,6 @@ Msg defines the nft Msg service.
 
 
 
-<a name="uptick.erc20.v1.AddCoinProposal"></a>
-
-### AddCoinProposal
-RegisterCoinProposal is a gov Content type to register a token pair
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| `title` | [string](#string) |  | title of the proposal |
-| `description` | [string](#string) |  | proposal description |
-| `metadata` | [cosmos.bank.v1beta1.Metadata](#cosmos.bank.v1beta1.Metadata) |  | token pair of Cosmos native denom and ERC20 token address |
-| `contract_address` | [string](#string) |  | erc20 address for query the token pair |
-
-
-
-
-
-
 <a name="uptick.erc20.v1.RegisterCoinProposal"></a>
 
 ### RegisterCoinProposal
@@ -813,7 +788,7 @@ native Coin and an ERC20 token address.
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | `erc20_address` | [string](#string) |  | address of ERC20 contract token |
-| `denoms` | [string](#string) | repeated | cosmos base denomination to be mapped to |
+| `denom` | [string](#string) |  | cosmos base denomination to be mapped to |
 | `enabled` | [bool](#bool) |  | shows token mapping enable status |
 | `contract_owner` | [Owner](#uptick.erc20.v1.Owner) |  | ERC20 owner address ENUM (0 invalid, 1 ModuleAccount, 2 external address) |
 
@@ -853,70 +828,6 @@ Owner enumerates the ownership of a ERC20 contract.
 | OWNER_UNSPECIFIED | 0 | OWNER_UNSPECIFIED defines an invalid/undefined owner. |
 | OWNER_MODULE | 1 | OWNER_MODULE erc20 is owned by the erc20 module account. |
 | OWNER_EXTERNAL | 2 | EXTERNAL erc20 is owned by an external account. |
-
-
- <!-- end enums -->
-
- <!-- end HasExtensions -->
-
- <!-- end services -->
-
-
-
-<a name="uptick/erc20/v1/event.proto"></a>
-<p align="right"><a href="#top">Top</a></p>
-
-## uptick/erc20/v1/event.proto
-
-
-
-<a name="uptick.erc20.v1.EventIBCERC20"></a>
-
-### EventIBCERC20
-EventIBCERC20 is emitted on IBC denom to ERC20 token
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| `status` | [Status](#uptick.erc20.v1.Status) |  |  |
-| `message` | [string](#string) |  |  |
-| `sequence` | [uint64](#uint64) |  |  |
-| `source_channel` | [string](#string) |  |  |
-| `destination_channel` | [string](#string) |  |  |
-
-
-
-
-
-
-<a name="uptick.erc20.v1.EventRegisterTokens"></a>
-
-### EventRegisterTokens
-EventRegisterTokens is emitted on module erc20 register coins
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| `denom` | [string](#string) | repeated |  |
-| `erc20_token` | [string](#string) |  |  |
-
-
-
-
-
- <!-- end messages -->
-
-
-<a name="uptick.erc20.v1.Status"></a>
-
-### Status
-Status enumerates the status of IBC ERC20
-
-| Name | Number | Description |
-| ---- | ------ | ----------- |
-| STATUS_UNKNOWN | 0 | STATUS_UNKNOWN defines the invalid/undefined status |
-| STATUS_SUCCESS | 1 | STATUS_SUCCESS defines the success IBC ERC20 execute |
-| STATUS_FAILED | 2 | STATUS_FAILED defines the failed IBC ERC20 execute |
 
 
  <!-- end enums -->
@@ -1139,7 +1050,6 @@ MsgConvertERC20 defines a Msg to convert an ERC20 token to a Cosmos SDK coin.
 | `amount` | [string](#string) |  | amount of ERC20 tokens to mint |
 | `receiver` | [string](#string) |  | bech32 address to receive SDK coins. |
 | `sender` | [string](#string) |  | sender hex address from the owner of the given ERC20 tokens |
-| `denom` | [string](#string) |  | denom for contract convert to |
 
 
 

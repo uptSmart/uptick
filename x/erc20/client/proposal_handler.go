@@ -15,7 +15,6 @@ func EmptyProposalRESTHandler(client.Context) cosrest.ProposalRESTHandler {
 
 var (
 	RegisterCoinProposalHandler         = govclient.NewProposalHandler(cli.NewRegisterCoinProposalCmd, rest.RegisterCoinProposalRESTHandler)
-	AddCoinProposalHandler              = govclient.NewProposalHandler(cli.NewAddCoinProposalCmd, EmptyProposalRESTHandler)
 	RegisterERC20ProposalHandler        = govclient.NewProposalHandler(cli.NewRegisterERC20ProposalCmd, rest.RegisterERC20ProposalRESTHandler)
 	ToggleTokenRelayProposalHandler     = govclient.NewProposalHandler(cli.NewToggleTokenRelayProposalCmd, rest.ToggleTokenRelayRESTHandler)
 	UpdateTokenPairERC20ProposalHandler = govclient.NewProposalHandler(cli.NewUpdateTokenPairERC20ProposalCmd, rest.UpdateTokenPairERC20ProposalRESTHandler)

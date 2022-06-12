@@ -18,7 +18,6 @@ import (
 // constants
 const (
 	ProposalTypeRegisterCoin         string = "RegisterCoin"
-	ProposalTypeAddCoin              string = "AddCoin"
 	ProposalTypeRegisterERC20        string = "RegisterERC20"
 	ProposalTypeToggleTokenRelay     string = "ToggleTokenRelay" // #nosec
 	ProposalTypeUpdateTokenPairERC20 string = "UpdateTokenPairERC20"
@@ -27,7 +26,6 @@ const (
 // Implements Proposal Interface
 var (
 	_ govtypes.Content = &RegisterCoinProposal{}
-	_ govtypes.Content = &AddCoinProposal{}
 	_ govtypes.Content = &RegisterERC20Proposal{}
 	_ govtypes.Content = &ToggleTokenRelayProposal{}
 	_ govtypes.Content = &UpdateTokenPairERC20Proposal{}
@@ -35,12 +33,10 @@ var (
 
 func init() {
 	govtypes.RegisterProposalType(ProposalTypeRegisterCoin)
-	govtypes.RegisterProposalType(ProposalTypeAddCoin)
 	govtypes.RegisterProposalType(ProposalTypeRegisterERC20)
 	govtypes.RegisterProposalType(ProposalTypeToggleTokenRelay)
 	govtypes.RegisterProposalType(ProposalTypeUpdateTokenPairERC20)
 	govtypes.RegisterProposalTypeCodec(&RegisterCoinProposal{}, "erc20/RegisterCoinProposal")
-	govtypes.RegisterProposalTypeCodec(&AddCoinProposal{}, "erc20/AddCoinProposal")
 	govtypes.RegisterProposalTypeCodec(&RegisterERC20Proposal{}, "erc20/RegisterERC20Proposal")
 	govtypes.RegisterProposalTypeCodec(&ToggleTokenRelayProposal{}, "erc20/ToggleTokenRelayProposal")
 	govtypes.RegisterProposalTypeCodec(&UpdateTokenPairERC20Proposal{}, "erc20/UpdateTokenPairERC20Proposal")
@@ -151,49 +147,6 @@ func (rtbp *RegisterERC20Proposal) ValidateBasic() error {
 	}
 	return govtypes.ValidateAbstract(rtbp)
 }
-
-// ================================================================================================================
-
-// NewAddCoinProposal returns new instance of AddCoinProposal
-func NewAddCoinProposal(title, description string, coinMetadata banktypes.Metadata, contractAddr string) govtypes.Content {
-	return &AddCoinProposal{
-		Title:           title,
-		Description:     description,
-		Metadata:        coinMetadata,
-		ContractAddress: contractAddr,
-	}
-}
-
-// ProposalRoute returns router key for this proposal
-func (*AddCoinProposal) ProposalRoute() string { return RouterKey }
-
-// ProposalType returns proposal type for this proposal
-func (*AddCoinProposal) ProposalType() string {
-	return ProposalTypeAddCoin
-}
-
-// ValidateBasic performs a stateless check of the proposal fields
-func (rtbp *AddCoinProposal) ValidateBasic() error {
-	if err := rtbp.Metadata.Validate(); err != nil {
-		return err
-	}
-
-	if err := ibctransfertypes.ValidateIBCDenom(rtbp.Metadata.Base); err != nil {
-		return err
-	}
-
-	if err := validateIBC(rtbp.Metadata); err != nil {
-		return err
-	}
-
-	if check := common.IsHexAddress(rtbp.ContractAddress); !check {
-		return sdkerrors.Wrap(ErrERC20Disabled, "ERC20 address invalid")
-	}
-
-	return govtypes.ValidateAbstract(rtbp)
-}
-
-// ================================================================================================================
 
 // NewToggleTokenRelayProposal returns new instance of ToggleTokenRelayProposal
 func NewToggleTokenRelayProposal(title, description string, token string) govtypes.Content {
