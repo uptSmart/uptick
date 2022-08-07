@@ -4,19 +4,15 @@ order: 2
 
 # Multi Node
 
-## Pre-requisite Readings
-
-- [Install Starport](https://docs.starport.network/#install-starport)  {prereq}
-- [Install Docker](https://docs.docker.com/engine/installation/)  {prereq}
-- [Install docker-compose](https://docs.docker.com/compose/install/)  {prereq}
-
 ## Automated Localnet with Starport
 
-Once you have installed `starport`, just run the localnet by using
+Once you have installed `ignite`, just run the localnet by using
 
 ```bash
-starport chain serve --reset-once -v -c ./starport.yml
+ignite chain serve
 ```
+
+Detailed instructions can be found in the [Ignite CLI documentation](https://docs.ignite.com/kb/serve)
 
 ## Automated Localnet with Docker
 

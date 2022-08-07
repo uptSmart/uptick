@@ -40,21 +40,6 @@ cat $HOME/.uptickd/config/genesis.json | jq '.consensus_params["block"]["time_io
 # Set gas limit in genesis
 cat $HOME/.uptickd/config/genesis.json | jq '.consensus_params["block"]["max_gas"]="10000000"' >$HOME/.uptickd/config/tmp_genesis.json && mv $HOME/.uptickd/config/tmp_genesis.json $HOME/.uptickd/config/genesis.json
 
-# Get close date
-node_address=$(uptickd keys list | grep "address: " | cut -c12-)
-current_date=$(date -u +"%Y-%m-%dT%TZ")
-cat $HOME/.uptickd/config/genesis.json | jq -r --arg current_date "$current_date" '.app_state["claims"]["params"]["airdrop_start_time"]=$current_date' >$HOME/.uptickd/config/tmp_genesis.json && mv $HOME/.uptickd/config/tmp_genesis.json $HOME/.uptickd/config/genesis.json
-# Add account to claims
-amount_to_claim=10000
-cat $HOME/.uptickd/config/genesis.json | jq -r --arg node_address "$node_address" --arg amount_to_claim "$amount_to_claim" '.app_state["claims"]["claims_records"]=[{"initial_claimable_amount":$amount_to_claim, "actions_completed":[false, false, false, false],"address":$node_address}]' >$HOME/.uptickd/config/tmp_genesis.json && mv $HOME/.uptickd/config/tmp_genesis.json $HOME/.uptickd/config/genesis.json
-
-cat $HOME/.uptickd/config/genesis.json | jq -r --arg current_date "$current_date" '.app_state["claim"]["params"]["duration_of_decay"]="1000000s"' >$HOME/.uptickd/config/tmp_genesis.json && mv $HOME/.uptickd/config/tmp_genesis.json $HOME/.uptickd/config/genesis.json
-cat $HOME/.uptickd/config/genesis.json | jq -r --arg current_date "$current_date" '.app_state["claim"]["params"]["duration_until_decay"]="100000s"' >$HOME/.uptickd/config/tmp_genesis.json && mv $HOME/.uptickd/config/tmp_genesis.json $HOME/.uptickd/config/genesis.json
-
-# Claim module account:
-# 0xA61808Fe40fEb8B3433778BBC2ecECCAA47c8c47 || uptick15cvq3ljql6utxseh0zau9m8ve2j8erz85uem4m
-cat $HOME/.uptickd/config/genesis.json | jq -r --arg amount_to_claim "$amount_to_claim" '.app_state["bank"]["balances"] += [{"address":"uptick15cvq3ljql6utxseh0zau9m8ve2j8erz85uem4m","coins":[{"denom":"auptick", "amount":$amount_to_claim}]}]' >$HOME/.uptickd/config/tmp_genesis.json && mv $HOME/.uptickd/config/tmp_genesis.json $HOME/.uptickd/config/genesis.json
-
 # disable produce empty block
 if [[ "$OSTYPE" == "darwin"* ]]; then
     sed -i '' 's/create_empty_blocks = true/create_empty_blocks = false/g' $HOME/.uptickd/config/config.toml
@@ -93,7 +78,7 @@ uptickd add-genesis-account $KEY 100000000000000000000000000auptick --keyring-ba
 validators_supply=$(cat $HOME/.uptickd/config/genesis.json | jq -r '.app_state["bank"]["supply"][0]["amount"]')
 # Bc is required to add this big numbers
 # total_supply=$(bc <<< "$amount_to_claim+$validators_supply")
-total_supply=100000000000000000000010000
+total_supply=100000000000000000000000000
 cat $HOME/.uptickd/config/genesis.json | jq -r --arg total_supply "$total_supply" '.app_state["bank"]["supply"][0]["amount"]=$total_supply' >$HOME/.uptickd/config/tmp_genesis.json && mv $HOME/.uptickd/config/tmp_genesis.json $HOME/.uptickd/config/genesis.json
 
 # Sign genesis transaction
