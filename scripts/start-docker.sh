@@ -11,8 +11,8 @@ echo "init Uptick with moniker=$MONIKER and chain-id=$CHAINID"
 ./uptickd init $MONIKER --chain-id $CHAINID --home $DATA_DIR
 echo "prepare genesis: Allocate genesis accounts"
 ./uptickd add-genesis-account \
-    "$(./uptickd keys show $KEY -a --home $DATA_DIR --keyring-backend test)" 1000000000000000000auptick,1000000000000000000stake \
-    --home $DATA_DIR --keyring-backend test
+"$(./uptickd keys show $KEY -a --home $DATA_DIR --keyring-backend test)" 1000000000000000000auptick,1000000000000000000stake \
+--home $DATA_DIR --keyring-backend test
 echo "prepare genesis: Sign genesis transaction"
 ./uptickd gentx $KEY 1000000000000000000stake --keyring-backend test --home $DATA_DIR --keyring-backend test --chain-id $CHAINID
 echo "prepare genesis: Collect genesis tx"
@@ -22,9 +22,8 @@ echo "prepare genesis: Run validate-genesis to ensure everything worked and that
 
 echo "starting uptick node $i in background ..."
 ./uptickd start --pruning=nothing --rpc.unsafe \
-    --keyring-backend test --home $DATA_DIR \
-    >$DATA_DIR/node.log 2>&1 &
-disown
+--keyring-backend test --home $DATA_DIR \
+>$DATA_DIR/node.log 2>&1 & disown
 
 echo "started uptick node"
 tail -f /dev/null
