@@ -13,6 +13,7 @@ This repository contains reference documentation on how to install and run an Up
 1. [Deterministic Builds](./reproducible-builds)
 1. [Run a Node](./run_node)
 1. [Interacting with the Node](./interact_node)
+1. [Cosmovisor](./cosmovisor)
 
 After going through the Quick Start contents, head over to the [basics](./../basics/README) to learn more.
 
