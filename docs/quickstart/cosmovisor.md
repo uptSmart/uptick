@@ -24,7 +24,7 @@ To install the latest version of `cosmovisor`, run the following command:
 go install github.com/cosmos/cosmos-sdk/cosmovisor/cmd/cosmovisor@latest
 ```
 
-To install a previous version, you can specify the version. IMPORTANT: Chains that use Cosmos-SDK v0.44.3 or earlier (eg v0.44.2) and want to use auto-download feature MUST use Cosmovisor v0.1.0
+To install a previous version, you can specify the version. IMPORTANT: Chains that use uptick v0.1.0 and want to use auto-download feature MUST use Cosmovisor v0.1.0
 
 ```sh
 go install github.com/cosmos/cosmos-sdk/cosmovisor/cmd/cosmovisor@v0.1.0
@@ -220,6 +220,13 @@ You can also use `sha512sum` if you would prefer to use longer hashes, or `md5su
 
 The following instructions provide a demonstration of `cosmovisor` using the uptick application (`uptickd`) shipped with the Cosmos SDK's source code. The following commands are to be run from within the `cosmos-sdk` repository.
 
+### Install Cosmovisor
+```sh
+git clone git@github.com:cosmos/cosmos-sdk
+cd cosmos-sdk
+make cosmovisor
+```
+
 ### Chain Setup
 
 Let's create a new chain using the `v0.1.0` version of uptickd:
@@ -318,7 +325,7 @@ Open a new terminal window and submit an upgrade proposal along with a deposit a
 ```
 
 ### check log
-```
+```sh
 tail -n 100 -f $DAEMON_HOME/cosmovisor/node.log
 ```
 The upgrade will occur automatically at height 50. Note: you may need to change the upgrade height in the snippet above if your test play takes more time.
