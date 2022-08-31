@@ -1,5 +1,5 @@
 KEY="mykey"
-CHAINID="uptick_7776-1"
+CHAINID="uptick_7777-1"
 MONIKER="localtestnet"
 KEYRING="test"
 KEYALGO="eth_secp256k1"

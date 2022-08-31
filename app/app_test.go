@@ -27,7 +27,7 @@ func TestUptickExport(t *testing.T) {
 	// Initialize the chain
 	app.InitChain(
 		abci.RequestInitChain{
-			ChainId:       "uptick_7776-1",
+			ChainId:       "uptick_7777-1",
 			Validators:    []abci.ValidatorUpdate{},
 			AppStateBytes: stateBytes,
 		},

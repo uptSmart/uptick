@@ -71,7 +71,7 @@ func Setup(isCheckTx bool, feemarketGenesis *feemarkettypes.GenesisState) *Uptic
 		// Initialize the chain
 		app.InitChain(
 			abci.RequestInitChain{
-				ChainId:         "uptick_7776-1",
+				ChainId:         "uptick_7777-1",
 				Validators:      []abci.ValidatorUpdate{},
 				ConsensusParams: DefaultConsensusParams,
 				AppStateBytes:   stateBytes,

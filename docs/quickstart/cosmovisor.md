@@ -297,7 +297,7 @@ nohup cosmovisor run start --home $DAEMON_HOME > $DAEMON_HOME/cosmovisor/node.lo
 
 #### Update App
 
-Update app to the latest version (e.g. v0.2.0).
+Update app to the latest version (e.g. v0.2.1).
 
 Next, we can add a migration - which is defined using `x/upgrade` [upgrade plan](https://github.com/cosmos/cosmos-sdk/blob/main/docs/core/upgrade.md) (you may refer to a past version if you are using an older Cosmos SDK release). In a migration we can do any deterministic state change.
 
