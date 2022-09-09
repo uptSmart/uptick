@@ -12,10 +12,10 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/simapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	ibctesting "github.com/cosmos/ibc-go/v3/testing"
+	ibctesting "github.com/cosmos/ibc-go/v5/testing"
 
-	"github.com/tharsis/ethermint/encoding"
-	feemarkettypes "github.com/tharsis/ethermint/x/feemarket/types"
+	"github.com/evmos/ethermint/encoding"
+	feemarkettypes "github.com/evmos/ethermint/x/feemarket/types"
 
 	"github.com/UptickNetwork/uptick/cmd/config"
 )

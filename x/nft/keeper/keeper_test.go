@@ -12,7 +12,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	feemarkettypes "github.com/tharsis/ethermint/x/feemarket/types"
+	feemarkettypes "github.com/evmos/ethermint/x/feemarket/types"
 
 	"github.com/UptickNetwork/uptick/app"
 	"github.com/UptickNetwork/uptick/x/nft"
