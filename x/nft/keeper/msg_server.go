@@ -42,3 +42,43 @@ func (k Keeper) Send(goCtx context.Context, msg *nft.MsgSend) (*nft.MsgSendRespo
 
 	return &nft.MsgSendResponse{}, nil
 }
+
+
+func (k Keeper) IssueClass(goCtx context.Context, msg *nft.MsgIssueClass) (*nft.MsgIssueClassResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	return &nft.MsgIssueClassResponse{}, k.SaveClass(ctx, nft.Class{
+		Id:          msg.Id,
+		Name:        msg.Name,
+		Symbol:      msg.Symbol,
+		Description: msg.Description,
+		Uri:         msg.Uri,
+		UriHash:     msg.Issuer,
+	})
+}
+
+func (k Keeper) MintNFT(goCtx context.Context, msg *nft.MsgMintNFT) (*nft.MsgMintNFTResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	var (
+		receiver sdk.AccAddress
+		err      error
+	)
+
+	receiver, err = sdk.AccAddressFromBech32(msg.Minter)
+	if err != nil {
+		return nil, err
+	}
+
+	if msg.Receiver != "" {
+		receiver, err = sdk.AccAddressFromBech32(msg.Receiver)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return &nft.MsgMintNFTResponse{}, k.Mint(ctx, nft.NFT{
+		ClassId: msg.ClassId,
+		Id:      msg.Id,
+		Uri:     msg.Uri,
+		UriHash: msg.UriHash,
+	}, receiver)
+}

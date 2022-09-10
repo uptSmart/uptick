@@ -5,19 +5,25 @@ import (
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 
 	"github.com/UptickNetwork/uptick/x/nft"
+
+	nftkeeper "github.com/cosmos/cosmos-sdk/x/nft/keeper"
 )
 
 // Keeper of the nft store
 type Keeper struct {
 	cdc      codec.BinaryCodec
 	storeKey storetypes.StoreKey
-	bk       nft.BankKeeper
+	nftkeeper.Keeper
 }
 
-// NewKeeper creates a new nft Keeper instance
-func NewKeeper(key storetypes.StoreKey,
-	cdc codec.BinaryCodec, ak nft.AccountKeeper, bk nft.BankKeeper,
+// NewKeeper creates a new instance of the NFT Keeper
+func NewKeeper(
+	storeKey storetypes.StoreKey,
+	cdc codec.Codec,
+	ak nft.AccountKeeper,
+	bk nft.BankKeeper,
 ) Keeper {
+
 	// ensure nft module account is set
 	if addr := ak.GetModuleAddress(nft.ModuleName); addr == nil {
 		panic("the nft module account has not been set")
@@ -25,7 +31,7 @@ func NewKeeper(key storetypes.StoreKey,
 
 	return Keeper{
 		cdc:      cdc,
-		storeKey: key,
-		bk:       bk,
+		storeKey: storeKey,
+		Keeper:   nftkeeper.NewKeeper(storeKey, cdc, ak, bk),
 	}
 }

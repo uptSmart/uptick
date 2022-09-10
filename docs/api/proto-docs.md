@@ -111,6 +111,10 @@
     - [Query](#cosmos.nft.v1beta1.Query)
   
 - [uptick/nft/v1beta1/tx.proto](#uptick/nft/v1beta1/tx.proto)
+    - [MsgIssueClass](#cosmos.nft.v1beta1.MsgIssueClass)
+    - [MsgIssueClassResponse](#cosmos.nft.v1beta1.MsgIssueClassResponse)
+    - [MsgMintNFT](#cosmos.nft.v1beta1.MsgMintNFT)
+    - [MsgMintNFTResponse](#cosmos.nft.v1beta1.MsgMintNFTResponse)
     - [MsgSend](#cosmos.nft.v1beta1.MsgSend)
     - [MsgSendResponse](#cosmos.nft.v1beta1.MsgSendResponse)
   
@@ -1514,6 +1518,67 @@ Query defines the gRPC querier service.
 
 
 
+<a name="cosmos.nft.v1beta1.MsgIssueClass"></a>
+
+### MsgIssueClass
+MsgIssueClass defines the payload for Msg/IssueClass
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| `id` | [string](#string) |  | id defines the unique identifier of the NFT classification, similar to the contract address of ERC721 |
+| `name` | [string](#string) |  | name defines the human-readable name of the NFT classification. Optional |
+| `symbol` | [string](#string) |  | symbol is an abbreviated name for nft classification. Optional |
+| `description` | [string](#string) |  | description is a brief description of nft classification. Optional |
+| `uri` | [string](#string) |  | uri for the class metadata stored off chain. It can define schema for Class and NFT `Data` attributes. Optional |
+| `uri_hash` | [string](#string) |  | uri_hash is a hash of the document pointed by uri. Optional |
+| `issuer` | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="cosmos.nft.v1beta1.MsgIssueClassResponse"></a>
+
+### MsgIssueClassResponse
+MsgIssueClassResponse defines the response for Msg/MsgIssueClass
+
+
+
+
+
+
+<a name="cosmos.nft.v1beta1.MsgMintNFT"></a>
+
+### MsgMintNFT
+MsgMintNFT defines the payload for Msg/MintNFT
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| `class_id` | [string](#string) |  | class_id associated with the NFT, similar to the contract address of ERC721 |
+| `id` | [string](#string) |  | id is a unique identifier of the NFT |
+| `uri` | [string](#string) |  | uri for the NFT metadata stored off chain |
+| `uri_hash` | [string](#string) |  | uri_hash is a hash of the document pointed by uri |
+| `minter` | [string](#string) |  | minter is a minter of the NFT |
+| `receiver` | [string](#string) |  | receiver is a receiver of the NFT, optional |
+
+
+
+
+
+
+<a name="cosmos.nft.v1beta1.MsgMintNFTResponse"></a>
+
+### MsgMintNFTResponse
+MintNFTResponse defines the response for Msg/MintNFT
+
+
+
+
+
+
 <a name="cosmos.nft.v1beta1.MsgSend"></a>
 
 ### MsgSend
@@ -1557,6 +1622,8 @@ Msg defines the nft Msg service.
 | Method Name | Request Type | Response Type | Description | HTTP Verb | Endpoint |
 | ----------- | ------------ | ------------- | ------------| ------- | -------- |
 | `Send` | [MsgSend](#cosmos.nft.v1beta1.MsgSend) | [MsgSendResponse](#cosmos.nft.v1beta1.MsgSendResponse) | Send defines a method to send a nft from one account to another account. | |
+| `IssueClass` | [MsgIssueClass](#cosmos.nft.v1beta1.MsgIssueClass) | [MsgIssueClassResponse](#cosmos.nft.v1beta1.MsgIssueClassResponse) | Register defines a rpc handler for MsgIssueClass | |
+| `MintNFT` | [MsgMintNFT](#cosmos.nft.v1beta1.MsgMintNFT) | [MsgMintNFTResponse](#cosmos.nft.v1beta1.MsgMintNFTResponse) | MintNFT defines a rpc handler for MsgMintNFT | |
 
  <!-- end services -->
 
