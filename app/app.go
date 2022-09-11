@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	govclient "github.com/cosmos/cosmos-sdk/x/gov/client"
-	"github.com/cosmos/cosmos-sdk/x/nft"
-	nftkeeper "github.com/cosmos/cosmos-sdk/x/nft/keeper"
 	"io"
 	"net/http"
 	"os"
@@ -123,18 +121,12 @@ import (
 	govv1beta1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 
-	// "github.com/evmos/ethermint/app/ante"
 	"github.com/UptickNetwork/uptick/app/ante"
+	
 
-	internft       "github.com/UptickNetwork/uptick/x/nft"
-	internftkeeper "github.com/UptickNetwork/uptick/x/nft/keeper"
-	internftmodule "github.com/UptickNetwork/uptick/x/nft/module"
-
-
-	ibcnfttransfer       "github.com/cosmos/ibc-go/v3/modules/apps/nft-transfer"
-	ibcnfttransferkeeper "github.com/cosmos/ibc-go/v3/modules/apps/nft-transfer/keeper"
-	ibcnfttransfertypes  "github.com/cosmos/ibc-go/v3/modules/apps/nft-transfer/types"
-
+	"github.com/cosmos/cosmos-sdk/x/nft"
+	nftkeeper "github.com/cosmos/cosmos-sdk/x/nft/keeper"
+	nftmodule "github.com/cosmos/cosmos-sdk/x/nft/module"
 
 )
 
@@ -203,8 +195,8 @@ var (
 		erc20.AppModuleBasic{},
 		collection.AppModuleBasic{},
 
-		internftmodule.AppModuleBasic{},
-		ibcnfttransfer.AppModuleBasic{},
+		nftmodule.AppModuleBasic{},
+		// ibcnfttransfer.AppModuleBasic{},
 
 	)
 
@@ -269,10 +261,10 @@ type Uptick struct {
 	ParamsKeeper     paramskeeper.Keeper
 	IBCKeeper        *ibckeeper.Keeper // IBC Keeper must be a pointer in the app, so we can SetRouter on it correctly
 
-	InterNFTKeeper   internftkeeper.Keeper
+	InterNFTKeeper   nftkeeper.Keeper
 	EvidenceKeeper   evidencekeeper.Keeper
 	TransferKeeper   ibctransferkeeper.Keeper
-	IBCNFTTransferKeeper ibcnfttransferkeeper.Keeper
+	// IBCNFTTransferKeeper ibcnfttransferkeeper.Keeper
 	FeeGrantKeeper   feegrantkeeper.Keeper
 
 	// make scoped keepers public for test purposes
@@ -347,9 +339,8 @@ func NewUptick(
 		ibctransfertypes.StoreKey,
 		capabilitytypes.StoreKey,
 
-		internft.StoreKey,
-		ibcnfttransfertypes.StoreKey,
-		internftkeeper.StoreKey,
+		nft.StoreKey,
+		nftkeeper.StoreKey,
 
 		authzkeeper.StoreKey,
 		// ethermint keys
@@ -626,7 +617,7 @@ func NewUptick(
 		feemarket.NewAppModule(app.FeeMarketKeeper),
 		// Uptick app modules
 		erc20.NewAppModule(*app.Erc20Keeper, app.AccountKeeper),
-		internftmodule.NewAppModule(appCodec, app.InterNFTKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
+		nftmodule.NewAppModule(appCodec, app.InterNFTKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
 		collection.NewAppModule(app.appCodec, app.CollectionKeeper, app.AccountKeeper, app.BankKeeper),
 	)
 
@@ -755,7 +746,7 @@ func NewUptick(
 		transferModule,
 		evm.NewAppModule(app.EvmKeeper, app.AccountKeeper),
 		feemarket.NewAppModule(app.FeeMarketKeeper),
-		internftmodule.NewAppModule(appCodec, app.InterNFTKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
+		nftmodule.NewAppModule(appCodec, app.InterNFTKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
 		collection.NewAppModule(app.appCodec, app.CollectionKeeper, app.AccountKeeper, app.BankKeeper),
 	)
 
