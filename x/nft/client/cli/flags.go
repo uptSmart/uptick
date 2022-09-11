@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"fmt"
 	flag "github.com/spf13/pflag"
 )
 
@@ -20,6 +21,9 @@ var (
 )
 
 func init() {
+
+	fmt.Println("flags 1")
+
 	fsIssueClass.String(FlagClassName, "", "Class Name")
 	fsIssueClass.String(FlagClassSymbol, "", "Class Symbol")
 	fsIssueClass.String(FlagClassDescription, "", "Class description")

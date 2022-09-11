@@ -28,7 +28,7 @@ func NewKeeper(cdc codec.Codec,
 	return Keeper{
 		storeKey: storeKey,
 		cdc:      cdc,
-		nk:       nftkeeper.NewKeeper(storeKey, cdc, ak, bk),
+		nk:       nftkeeper.NewKeeper(cdc,storeKey,ak, bk),
 	}
 }
 

@@ -208,11 +208,14 @@ func (m *NFT) GetData() *types.Any {
 }
 
 func init() {
+
+	fmt.Println("nft.pb 1")
+
 	proto.RegisterType((*Class)(nil), "cosmos.nft.v1beta1.Class")
 	proto.RegisterType((*NFT)(nil), "cosmos.nft.v1beta1.NFT")
 }
 
-func init() { proto.RegisterFile("uptick/nft/v1beta1/nft.proto", fileDescriptor_7d4883ff2d2c3728) }
+func init() { fmt.Println("nft.pb 1"); proto.RegisterFile("uptick/nft/v1beta1/nft.proto", fileDescriptor_7d4883ff2d2c3728) }
 
 var fileDescriptor_7d4883ff2d2c3728 = []byte{
 	// 324 bytes of a gzipped FileDescriptorProto

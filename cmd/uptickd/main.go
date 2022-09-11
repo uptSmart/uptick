@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/cosmos/cosmos-sdk/server"
@@ -12,12 +13,14 @@ import (
 )
 
 func main() {
+
+	fmt.Println("man start ....")
 	setupConfig()
 	cmdcfg.RegisterDenoms()
 
 	rootCmd, _ := NewRootCmd()
 
-	if err := svrcmd.Execute(rootCmd,"uptickd",app.DefaultNodeHome); err != nil {
+	if err := svrcmd.Execute(rootCmd,"uptick",app.DefaultNodeHome); err != nil {
 		switch e := err.(type) {
 		case server.ErrorCode:
 			os.Exit(e.Code)

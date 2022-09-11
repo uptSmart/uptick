@@ -23,6 +23,6 @@ func TestInitCmd(t *testing.T) {
 		fmt.Sprintf("--%s=%s", flags.FlagChainID, "uptick_7777-1"),
 	})
 
-	err := svrcmd.Execute(rootCmd, app.DefaultNodeHome)
+	err := svrcmd.Execute(rootCmd, "uptick",app.DefaultNodeHome)
 	require.NoError(t, err)
 }

@@ -18,8 +18,8 @@ type Keeper struct {
 
 // NewKeeper creates a new instance of the NFT Keeper
 func NewKeeper(
-	storeKey storetypes.StoreKey,
 	cdc codec.Codec,
+	storeKey storetypes.StoreKey,
 	ak nft.AccountKeeper,
 	bk nft.BankKeeper,
 ) Keeper {
