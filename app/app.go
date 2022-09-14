@@ -91,7 +91,6 @@ import (
 	ibctransfertypes "github.com/cosmos/ibc-go/v5/modules/apps/transfer/types"
 	ibc "github.com/cosmos/ibc-go/v5/modules/core"
 	ibcclient "github.com/cosmos/ibc-go/v5/modules/core/02-client"
-
 	ibcclientclient "github.com/cosmos/ibc-go/v5/modules/core/02-client/client"
 
 	porttypes "github.com/cosmos/ibc-go/v5/modules/core/05-port/types"
@@ -128,6 +127,13 @@ import (
 	nftkeeper "github.com/cosmos/cosmos-sdk/x/nft/keeper"
 	nftmodule "github.com/cosmos/cosmos-sdk/x/nft/module"
 
+	internft "github.com/UptickNetwork/uptick/x/inter-nft"
+	internftkeeper "github.com/UptickNetwork/uptick/x/inter-nft/keeper"
+	internftmodule "github.com/UptickNetwork/uptick/x/inter-nft/module"
+
+	nfttransfer "github.com/cosmos/ibc-go/v5/modules/apps/nft-transfer"
+	ibcnfttransferkeeper "github.com/cosmos/ibc-go/v5/modules/apps/nft-transfer/keeper"
+	ibcnfttransfertypes "github.com/cosmos/ibc-go/v5/modules/apps/nft-transfer/types"
 )
 
 func init() {
@@ -196,7 +202,8 @@ var (
 		collection.AppModuleBasic{},
 
 		nftmodule.AppModuleBasic{},
-		// ibcnfttransfer.AppModuleBasic{},
+		internftmodule.AppModuleBasic{},
+		nfttransfer.AppModuleBasic{},
 
 	)
 
@@ -261,10 +268,8 @@ type Uptick struct {
 	ParamsKeeper     paramskeeper.Keeper
 	IBCKeeper        *ibckeeper.Keeper // IBC Keeper must be a pointer in the app, so we can SetRouter on it correctly
 
-	InterNFTKeeper   nftkeeper.Keeper
 	EvidenceKeeper   evidencekeeper.Keeper
 	TransferKeeper   ibctransferkeeper.Keeper
-	// IBCNFTTransferKeeper ibcnfttransferkeeper.Keeper
 	FeeGrantKeeper   feegrantkeeper.Keeper
 
 	// make scoped keepers public for test purposes
@@ -273,6 +278,9 @@ type Uptick struct {
 	ScopedICAControllerKeeper capabilitykeeper.ScopedKeeper
 	ScopedICAHostKeeper       capabilitykeeper.ScopedKeeper
 	ScopedNFTTransferKeeper   capabilitykeeper.ScopedKeeper
+
+	InterNFTKeeper   internftkeeper.Keeper
+	IBCNFTTransferKeeper ibcnfttransferkeeper.Keeper
 
 	// the module manager
 	mm *module.Manager
@@ -349,6 +357,9 @@ func NewUptick(
 		// uptick keys
 		erc20types.StoreKey,
 		collectiontypes.StoreKey,
+
+		internft.StoreKey,
+		ibcnfttransfertypes.StoreKey,
 	)
 
 	// Add the EVM transient store key
@@ -376,7 +387,8 @@ func NewUptick(
 
 	scopedIBCKeeper := app.CapabilityKeeper.ScopeToModule(ibchost.ModuleName)
 	scopedTransferKeeper := app.CapabilityKeeper.ScopeToModule(ibctransfertypes.ModuleName)
-	// scopedNFTTransferKeeper := app.CapabilityKeeper.ScopeToModule(ibcnfttransfertypes.ModuleName)
+
+	scopedNFTTransferKeeper := app.CapabilityKeeper.ScopeToModule(ibcnfttransfertypes.ModuleName)
 
 	// Applications that wish to enforce statically created ScopedKeepers should call `Seal` after creating
 	// their scoped modules in `NewApp` with `ScopeToModule`
@@ -558,17 +570,44 @@ func NewUptick(
 		scopedTransferKeeper,
 	)
 	app.Erc20Keeper.SetICS4Wrapper(app.IBCKeeper.ChannelKeeper)
-	transferModule := transfer.NewAppModule(app.TransferKeeper)
 
-	var transferStack porttypes.IBCModule
-	transferStack = transfer.NewIBCModule(app.TransferKeeper)
-	transferStack = erc20.NewIBCMiddleware(*app.Erc20Keeper, transferStack)
+	transferModule := transfer.NewAppModule(app.TransferKeeper)
+	transferIBCModule := transfer.NewIBCModule(app.TransferKeeper)
+	// create IBC module from bottom to top of stack
+	transferStack := erc20.NewIBCMiddleware(*app.Erc20Keeper, transferIBCModule)
+
+	app.InterNFTKeeper = internftkeeper.NewKeeper(
+		appCodec,
+		keys[internft.StoreKey],
+		app.AccountKeeper,
+		app.BankKeeper,
+	)
+	interTxModule := internftmodule.NewAppModule(appCodec, app.InterNFTKeeper)
+
+	app.IBCNFTTransferKeeper = ibcnfttransferkeeper.NewKeeper(
+		appCodec,
+		keys[ibcnfttransfertypes.StoreKey],
+		app.IBCKeeper.ChannelKeeper,
+		app.IBCKeeper.ChannelKeeper,
+		&app.IBCKeeper.PortKeeper,
+		app.AccountKeeper,
+		app.InterNFTKeeper,
+		scopedNFTTransferKeeper,
+	)
+	nfttransferModule := nfttransfer.NewAppModule(app.IBCNFTTransferKeeper)
+	nfttransferIBCModule := nfttransfer.NewIBCModule(app.IBCNFTTransferKeeper)
 
 	// Create static IBC router, add transfer route, then set and seal it
 	ibcRouter := porttypes.NewRouter()
+
 	ibcRouter.AddRoute(ibctransfertypes.ModuleName, transferStack)
 	app.IBCKeeper.SetRouter(ibcRouter)
 
+	ibcRouter.AddRoute(ibctransfertypes.ModuleName, transferIBCModule).
+		AddRoute(ibcnfttransfertypes.ModuleName, nfttransferIBCModule)
+	app.IBCKeeper.SetRouter(ibcRouter)
+
+	//
 	app.NFTKeeper = nftkeeper.NewKeeper(keys[nftkeeper.StoreKey], appCodec, app.AccountKeeper, app.BankKeeper)
 	app.CollectionKeeper = collectionkeeper.NewKeeper(appCodec, keys[collectiontypes.StoreKey], app.AccountKeeper, app.BankKeeper)
 
@@ -580,7 +619,6 @@ func NewUptick(
 	app.EvidenceKeeper = *evidenceKeeper
 
 	/****  Module Options ****/
-
 	// NOTE: we may consider parsing `appOpts` inside module constructors. For the moment
 	// we prefer to be more strict in what arguments the modules expect.
 	skipGenesisInvariants := cast.ToBool(appOpts.Get(crisis.FlagSkipGenesisInvariants))
@@ -617,8 +655,12 @@ func NewUptick(
 		feemarket.NewAppModule(app.FeeMarketKeeper),
 		// Uptick app modules
 		erc20.NewAppModule(*app.Erc20Keeper, app.AccountKeeper),
-		nftmodule.NewAppModule(appCodec, app.InterNFTKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
+		nftmodule.NewAppModule(appCodec, app.NFTKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
 		collection.NewAppModule(app.appCodec, app.CollectionKeeper, app.AccountKeeper, app.BankKeeper),
+
+		nfttransferModule,
+		interTxModule,
+
 	)
 
 	// During begin block slashing happens after distr.BeginBlocker so that
@@ -653,6 +695,9 @@ func NewUptick(
 		erc20types.ModuleName,
 		nft.ModuleName,
 		collectiontypes.ModuleName,
+
+		ibcnfttransfertypes.ModuleName,
+		internft.ModuleName,
 	)
 
 	// NOTE: fee market module must go last in order to retrieve the block gas used.
@@ -681,6 +726,8 @@ func NewUptick(
 		erc20types.ModuleName,
 		nft.ModuleName,
 		collectiontypes.ModuleName,
+		ibcnfttransfertypes.ModuleName,
+		internft.ModuleName,
 	)
 
 	// NOTE: The genutils module must occur after staking so that pools are
@@ -715,6 +762,9 @@ func NewUptick(
 		crisistypes.ModuleName,
 		nft.ModuleName,
 		collectiontypes.ModuleName,
+
+		ibcnfttransfertypes.ModuleName,
+		internft.ModuleName,
 	)
 
 	app.mm.RegisterInvariants(&app.CrisisKeeper)
@@ -746,7 +796,7 @@ func NewUptick(
 		transferModule,
 		evm.NewAppModule(app.EvmKeeper, app.AccountKeeper),
 		feemarket.NewAppModule(app.FeeMarketKeeper),
-		nftmodule.NewAppModule(appCodec, app.InterNFTKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
+		nftmodule.NewAppModule(appCodec, app.NFTKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
 		collection.NewAppModule(app.appCodec, app.CollectionKeeper, app.AccountKeeper, app.BankKeeper),
 	)
 

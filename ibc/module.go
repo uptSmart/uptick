@@ -21,6 +21,21 @@ func NewModule(app porttypes.IBCModule) *Module {
 		app: app,
 	}
 }
+//
+//// OnChanOpenInit implements the Module interface
+//// It calls the underlying app's OnChanOpenInit callback.
+//func (im Module) OnChanOpenInit(
+//	ctx sdk.Context,
+//	order channeltypes.Order,
+//	connectionHops []string,
+//	portID string,
+//	channelID string,
+//	chanCap *capabilitytypes.Capability,
+//	counterparty channeltypes.Counterparty,
+//	version string,
+//) error {
+//	return im.app.OnChanOpenInit(ctx, order, connectionHops, portID, channelID, chanCap, counterparty, version)
+//}
 
 // OnChanOpenInit implements the Module interface
 // It calls the underlying app's OnChanOpenInit callback.
@@ -36,9 +51,6 @@ func (im Module) OnChanOpenInit(
 ) (string, error) {
 	return im.app.OnChanOpenInit(ctx, order, connectionHops, portID, channelID, chanCap, counterparty, version)
 }
-
-
-
 
 // OnChanOpenTry implements the Module interface.
 // It calls the underlying app's OnChanOpenTry callback.
