@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	govclient "github.com/cosmos/cosmos-sdk/x/gov/client"
 	"io"
 	"net/http"
 	"os"
@@ -18,6 +17,8 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 	tmos "github.com/tendermint/tendermint/libs/os"
 	dbm "github.com/tendermint/tm-db"
+
+	govclient "github.com/cosmos/cosmos-sdk/x/gov/client"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
@@ -35,7 +36,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/version"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
-	authsims "github.com/cosmos/cosmos-sdk/x/auth/simulation"
 	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/cosmos/cosmos-sdk/x/auth/vesting"
@@ -117,11 +117,12 @@ import (
 	erc20keeper "github.com/UptickNetwork/uptick/x/erc20/keeper"
 	erc20types "github.com/UptickNetwork/uptick/x/erc20/types"
 
-	govv1beta1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
+	govv1beta1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 
 	"github.com/UptickNetwork/uptick/app/ante"
-	
+
+	authsims "github.com/cosmos/cosmos-sdk/x/auth/simulation"
 
 	"github.com/cosmos/cosmos-sdk/x/nft"
 	nftkeeper "github.com/cosmos/cosmos-sdk/x/nft/keeper"
@@ -134,6 +135,11 @@ import (
 	nfttransfer "github.com/cosmos/ibc-go/v5/modules/apps/nft-transfer"
 	ibcnfttransferkeeper "github.com/cosmos/ibc-go/v5/modules/apps/nft-transfer/keeper"
 	ibcnfttransfertypes "github.com/cosmos/ibc-go/v5/modules/apps/nft-transfer/types"
+
+	"github.com/UptickNetwork/uptick/x/erc721"
+	erc721client "github.com/UptickNetwork/uptick/x/erc721/client"
+	erc721keeper "github.com/UptickNetwork/uptick/x/erc721/keeper"
+	erc721types "github.com/UptickNetwork/uptick/x/erc721/types"
 )
 
 func init() {
@@ -182,6 +188,10 @@ var (
 				erc20client.RegisterCoinProposalHandler,
 				erc20client.RegisterERC20ProposalHandler,
 				erc20client.ToggleTokenRelayProposalHandler,
+
+				erc721client.RegisterNFTProposalHandler,
+				erc721client.RegisterERC721ProposalHandler,
+				erc721client.ToggleTokenConversionProposalHandler,
 			},
 		),
 
@@ -189,22 +199,22 @@ var (
 		crisis.AppModuleBasic{},
 		slashing.AppModuleBasic{},
 		ibc.AppModuleBasic{},
+		authzmodule.AppModuleBasic{},
+
 		feegrantmodule.AppModuleBasic{},
 		upgrade.AppModuleBasic{},
 		evidence.AppModuleBasic{},
 		transfer.AppModuleBasic{},
 		vesting.AppModuleBasic{},
-
-		authzmodule.AppModuleBasic{},
 		evm.AppModuleBasic{},
 		feemarket.AppModuleBasic{},
 		erc20.AppModuleBasic{},
-		collection.AppModuleBasic{},
+		erc721.AppModuleBasic{},
 
+		collection.AppModuleBasic{},
 		nftmodule.AppModuleBasic{},
 		internftmodule.AppModuleBasic{},
 		nfttransfer.AppModuleBasic{},
-
 	)
 
 	// module account permissions
@@ -219,8 +229,9 @@ var (
 
 		evmtypes.ModuleName:            {authtypes.Minter, authtypes.Burner}, // used for secure addition and subtraction of balance using module account
 		erc20types.ModuleName:          {authtypes.Minter, authtypes.Burner},
-		collectiontypes.ModuleName:     nil,
+		erc721types.ModuleName:         nil,
 
+		collectiontypes.ModuleName:     nil,
 		nft.ModuleName:                 nil,
 	}
 
@@ -294,6 +305,8 @@ type Uptick struct {
 	FeeMarketKeeper feemarketkeeper.Keeper
 	// Uptick keepers
 	Erc20Keeper      *erc20keeper.Keeper
+	Erc721Keeper     erc721keeper.Keeper
+
 	NFTKeeper        nftkeeper.Keeper
 	CollectionKeeper collectionkeeper.Keeper
 	// simulation manager
@@ -347,8 +360,8 @@ func NewUptick(
 		ibctransfertypes.StoreKey,
 		capabilitytypes.StoreKey,
 
-		nft.StoreKey,
-		nftkeeper.StoreKey,
+		// nft.StoreKey,
+		// nftkeeper.StoreKey,
 
 		authzkeeper.StoreKey,
 		// ethermint keys
@@ -356,6 +369,7 @@ func NewUptick(
 		feemarkettypes.StoreKey,
 		// uptick keys
 		erc20types.StoreKey,
+		erc721types.StoreKey,
 		collectiontypes.StoreKey,
 
 		internft.StoreKey,
@@ -363,7 +377,7 @@ func NewUptick(
 	)
 
 	// Add the EVM transient store key
-	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey, evmtypes.TransientKey)
+	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey, evmtypes.TransientKey,feemarkettypes.TransientKey)
 	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
 
 	app := &Uptick{
@@ -524,6 +538,21 @@ func NewUptick(
 		app.BankKeeper,
 		app.EvmKeeper,
 	)
+	app.NFTKeeper = nftkeeper.NewKeeper(
+		keys[nftkeeper.StoreKey],
+		appCodec,
+		app.AccountKeeper,
+		app.BankKeeper)
+
+	app.Erc721Keeper = erc721keeper.NewKeeper(
+		keys[erc721types.StoreKey],
+		appCodec,
+		app.GetSubspace(erc721types.ModuleName),
+		app.AccountKeeper,
+		app.NFTKeeper,
+		app.EvmKeeper,
+	)
+
 	// register the proposal types
 	// govRouter := govtypes.NewRouter()
 	govRouter := govv1beta1.NewRouter()
@@ -532,7 +561,8 @@ func NewUptick(
 		AddRoute(distrtypes.RouterKey, distr.NewCommunityPoolSpendProposalHandler(app.DistrKeeper)).
 		AddRoute(upgradetypes.RouterKey, upgrade.NewSoftwareUpgradeProposalHandler(app.UpgradeKeeper)).
 		AddRoute(ibchost.RouterKey, ibcclient.NewClientProposalHandler(app.IBCKeeper.ClientKeeper)).
-		AddRoute(erc20types.RouterKey, erc20.NewErc20ProposalHandler(app.Erc20Keeper))
+		AddRoute(erc20types.RouterKey, erc20.NewErc20ProposalHandler(app.Erc20Keeper)).
+		AddRoute(erc721types.RouterKey, erc721.NewErc721ProposalHandler(&app.Erc721Keeper))
 
 	govConfig := govtypes.DefaultConfig()
 	govKeeper := govkeeper.NewKeeper(
@@ -600,15 +630,13 @@ func NewUptick(
 	// Create static IBC router, add transfer route, then set and seal it
 	ibcRouter := porttypes.NewRouter()
 
-	ibcRouter.AddRoute(ibctransfertypes.ModuleName, transferStack)
-	app.IBCKeeper.SetRouter(ibcRouter)
+	ibcRouter.AddRoute(ibctransfertypes.ModuleName, transferStack).
+		      //AddRoute(ibctransfertypes.ModuleName, transferIBCModule).
+		      AddRoute(ibcnfttransfertypes.ModuleName, nfttransferIBCModule)
 
-	ibcRouter.AddRoute(ibctransfertypes.ModuleName, transferIBCModule).
-		AddRoute(ibcnfttransfertypes.ModuleName, nfttransferIBCModule)
 	app.IBCKeeper.SetRouter(ibcRouter)
 
 	//
-	app.NFTKeeper = nftkeeper.NewKeeper(keys[nftkeeper.StoreKey], appCodec, app.AccountKeeper, app.BankKeeper)
 	app.CollectionKeeper = collectionkeeper.NewKeeper(appCodec, keys[collectiontypes.StoreKey], app.AccountKeeper, app.BankKeeper)
 
 	// create evidence keeper with router
@@ -655,6 +683,7 @@ func NewUptick(
 		feemarket.NewAppModule(app.FeeMarketKeeper),
 		// Uptick app modules
 		erc20.NewAppModule(*app.Erc20Keeper, app.AccountKeeper),
+		erc721.NewAppModule(app.Erc721Keeper, app.AccountKeeper),
 		nftmodule.NewAppModule(appCodec, app.NFTKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
 		collection.NewAppModule(app.appCodec, app.CollectionKeeper, app.AccountKeeper, app.BankKeeper),
 
@@ -693,11 +722,11 @@ func NewUptick(
 		paramstypes.ModuleName,
 		vestingtypes.ModuleName,
 		erc20types.ModuleName,
+		erc721types.ModuleName,
 		nft.ModuleName,
 		collectiontypes.ModuleName,
 
 		ibcnfttransfertypes.ModuleName,
-		internft.ModuleName,
 	)
 
 	// NOTE: fee market module must go last in order to retrieve the block gas used.
@@ -724,10 +753,10 @@ func NewUptick(
 		upgradetypes.ModuleName,
 		vestingtypes.ModuleName,
 		erc20types.ModuleName,
+		erc721types.ModuleName,
 		nft.ModuleName,
 		collectiontypes.ModuleName,
 		ibcnfttransfertypes.ModuleName,
-		internft.ModuleName,
 	)
 
 	// NOTE: The genutils module must occur after staking so that pools are
@@ -741,11 +770,18 @@ func NewUptick(
 		authtypes.ModuleName,
 		banktypes.ModuleName,
 		distrtypes.ModuleName,
+		// NOTE: staking requires the claiming hook
 		stakingtypes.ModuleName,
 		slashingtypes.ModuleName,
 		govtypes.ModuleName,
 		minttypes.ModuleName,
 		ibchost.ModuleName,
+		// Ethermint modules
+		// evm module denomination is used by the feesplit module, in AnteHandle
+		evmtypes.ModuleName,
+		// NOTE: feemarket module needs to be initialized before genutil module:
+		// gentx transactions use MinGasPriceDecorator.AnteHandle
+		feemarkettypes.ModuleName,
 		genutiltypes.ModuleName,
 		evidencetypes.ModuleName,
 		ibctransfertypes.ModuleName,
@@ -754,17 +790,14 @@ func NewUptick(
 		paramstypes.ModuleName,
 		upgradetypes.ModuleName,
 		vestingtypes.ModuleName,
-		// Ethermint modules
-		evmtypes.ModuleName, feemarkettypes.ModuleName,
-		// Uptick modules
+
 		erc20types.ModuleName,
-		// NOTE: crisis module must go at the end to check for invariants on each module
+		erc721types.ModuleName,
+
 		crisistypes.ModuleName,
 		nft.ModuleName,
 		collectiontypes.ModuleName,
-
 		ibcnfttransfertypes.ModuleName,
-		internft.ModuleName,
 	)
 
 	app.mm.RegisterInvariants(&app.CrisisKeeper)
@@ -828,6 +861,8 @@ func NewUptick(
 		panic(err)
 	}
 
+	fmt.Printf("xxl options ::: %v+",options.FeeMarketKeeper)
+
 	app.SetAnteHandler(ante.NewAnteHandler(options))
 	app.SetEndBlocker(app.EndBlocker)
 	app.registerUpgradeHandlers()
@@ -887,6 +922,11 @@ func (app *Uptick) InitChainer(ctx sdk.Context, req abci.RequestInitChain) abci.
 		panic(err)
 	}
 	app.UpgradeKeeper.SetModuleVersionMap(ctx, app.mm.GetVersionMap())
+
+	result := app.FeeMarketKeeper.GetParams(ctx).MinGasPrice
+	fmt.Printf("xxl InitChainer : %v+",result)
+
+	//fmt.Printf("xxl ctx %v+ app.appCodec %v+ genesisState %v+ \n",ctx,app.appCodec,genesisState)
 	return app.mm.InitGenesis(ctx, app.appCodec, genesisState)
 }
 
@@ -1069,6 +1109,7 @@ func initParamsKeeper(
 	paramsKeeper.Subspace(feemarkettypes.ModuleName)
 	// uptick subspaces
 	paramsKeeper.Subspace(erc20types.ModuleName)
+	paramsKeeper.Subspace(erc721types.ModuleName)
 	return paramsKeeper
 }
 

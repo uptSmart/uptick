@@ -35,7 +35,8 @@ func init() {
 
 // CreateClass generates a string the module name plus the address to avoid conflicts with names staring with a number
 func CreateClassID(address string) string {
-	return fmt.Sprintf("%s/%s", ModuleName, address)
+	//xxl TODO
+	return fmt.Sprintf("%s-%s", ModuleName, address)
 }
 
 // NewRegisterNFTProposal returns new instance of RegisterCoinProposal

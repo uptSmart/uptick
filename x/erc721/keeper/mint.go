@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"fmt"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
@@ -16,6 +17,7 @@ func (k Keeper) MintingEnabled(
 	receiver sdk.AccAddress,
 	token string,
 ) (types.TokenPair, error) {
+
 	params := k.GetParams(ctx)
 	if !params.EnableErc721 {
 		return types.TokenPair{}, sdkerrors.Wrap(
@@ -23,6 +25,7 @@ func (k Keeper) MintingEnabled(
 		)
 	}
 
+	fmt.Printf("####################xxl %v+ ",token)
 	id := k.GetTokenPairID(ctx, token)
 	if len(id) == 0 {
 		return types.TokenPair{}, sdkerrors.Wrapf(

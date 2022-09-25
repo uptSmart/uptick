@@ -1,6 +1,7 @@
 package ante
 
 import (
+	"fmt"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	authante "github.com/cosmos/cosmos-sdk/x/auth/ante"
@@ -18,20 +19,27 @@ func NewAnteHandler(options HandlerOptions) sdk.AnteHandler {
 	) (newCtx sdk.Context, err error) {
 		var anteHandler sdk.AnteHandler
 
+		fmt.Printf("xxl 1... %v+ \n ",options.FeeMarketKeeper.GetParams(ctx).MinGasPrice)
+
+
 		defer ethante.Recover(ctx.Logger(), &err)
 
 		txWithExtensions, ok := tx.(authante.HasExtensionOptionsTx)
 		if ok {
 			opts := txWithExtensions.GetExtensionOptions()
+			fmt.Println("xxl 2... ")
 			if len(opts) > 0 {
 				switch typeURL := opts[0].GetTypeUrl(); typeURL {
 				case "/ethermint.evm.v1.ExtensionOptionsEthereumTx":
+					fmt.Println("xxl 3... ")
 					// handle as *evmtypes.MsgEthereumTx
 					anteHandler = newEthAnteHandler(options)
 				case "/ethermint.types.v1.ExtensionOptionsWeb3Tx":
+					fmt.Println("xxl 4... ")
 					// handle as normal Cosmos SDK tx, except signature is checked for EIP712 representation
 					anteHandler = newCosmosAnteHandlerEip712(options)
 				default:
+					fmt.Println("xxl 5... ")
 					return ctx, sdkerrors.Wrapf(
 						sdkerrors.ErrUnknownExtensionOptions,
 						"rejecting tx with unsupported extension option: %s", typeURL,
@@ -45,11 +53,15 @@ func NewAnteHandler(options HandlerOptions) sdk.AnteHandler {
 		// handle as totally normal Cosmos SDK tx
 		switch tx.(type) {
 		case sdk.Tx:
+			// fmt.Printf("xxl 6... %v+ \n",options)
+			fmt.Println("xxl 6... ")
 			anteHandler = newCosmosAnteHandler(options)
 		default:
 			return ctx, sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "invalid transaction type: %T", tx)
 		}
 
+		fmt.Println("xxl 7... ")
+		// fmt.Printf("xxl 8 %v+ \n",tx)
 		return anteHandler(ctx, tx, sim)
 	}
 }

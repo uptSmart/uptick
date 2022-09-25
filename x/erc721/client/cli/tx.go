@@ -210,6 +210,7 @@ func NewRegisterERC721ProposalCmd() *cobra.Command {
 		Long:    "Submit a proposal to register an erc721 token to the erc721 along with an initial deposit.",
 		Example: fmt.Sprintf("$ %s tx gov submit-proposal register-erc721 <contract-address> --from=<key_or_address>", version.AppName),
 		RunE: func(cmd *cobra.Command, args []string) error {
+
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
 				return err

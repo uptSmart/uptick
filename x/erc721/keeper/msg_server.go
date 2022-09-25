@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"fmt"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -91,7 +92,15 @@ func (k Keeper) ConvertERC721(
 	erc721 := common.HexToAddress(pair.Erc721Address)
 	acc := k.evmKeeper.GetAccountWithoutBalance(ctx, erc721)
 
-	owner, err := k.QueryERC721TokenOwner(ctx, erc721, &big.Int{})
+	bigTokenId := new(big.Int)
+	_, err = fmt.Sscan(msg.TokenId, bigTokenId)
+	if err != nil {
+		sdkerrors.Wrapf(sdkerrors.ErrUnauthorized, "%s error scanning value", err)
+		return nil, err
+	}
+
+	fmt.Printf("################### erc721 : %v+,bigTokenId :%v+,ContractAddress %v+ \n", erc721, bigTokenId,msg.ContractAddress)
+	owner, err := k.QueryERC721TokenOwner(ctx, erc721, bigTokenId)
 	if err != nil {
 		return nil, err
 	}
@@ -197,9 +206,11 @@ func (k Keeper) convertNFTNativeERC721(
 
 	// query tokenID by given nftID
 	tokenID := string(k.GetNFTPairByNFTID(ctx, msg.NftId))
+	// sender := common.Address{msg.Sender}
 
+	fmt.Printf("################### convertNFTNativeERC721 0 sender %v+ ,receiver %v+, NftId %v+ \n",sender,receiver,msg.NftId)
 	// Unescrow Token and send to receiver
-	res, err := k.CallEVM(ctx, erc721, types.ModuleAddress, contract, true, "safeTransferFrom", receiver, msg.NftId)
+	res, err := k.CallEVM(ctx, erc721, types.ModuleAddress, contract, true, "safeTransferFrom",receiver,receiver, msg.NftId)
 	if err != nil {
 		return nil, err
 	}
@@ -296,8 +307,16 @@ func (k Keeper) convertERC721NativeERC721(
 	erc721 := contracts.ERC721PresetMinterPauserAutoIdsContract.ABI
 	contract := pair.GetERC721Contract()
 
+	bigTokenId := new(big.Int)
+	_, err := fmt.Sscan(msg.TokenId, bigTokenId)
+	if err != nil {
+		sdkerrors.Wrapf(sdkerrors.ErrUnauthorized, "%s error scanning value", err)
+		return nil, err
+	}
+
 	// Escrow tokens on module account
-	res, err := k.CallEVM(ctx, erc721, sender, contract, true, "safeTransferFrom", types.ModuleAddress, msg.TokenId)
+	fmt.Printf("################### convertERC721NativeERC721 1 sender %v+ ,receiver %v+, NftId %v+ \n",sender,types.ModuleAddress,msg.TokenId)
+	res, err := k.CallEVM(ctx, erc721, sender, contract, true, "safeTransferFrom", sender,types.ModuleAddress, bigTokenId)
 	if err != nil {
 		return nil, err
 	}
@@ -314,7 +333,9 @@ func (k Keeper) convertERC721NativeERC721(
 	}
 
 	// generate nftID
-	nftID := contract.String() + "|" + msg.TokenId
+	// nftID := contract.String() + "|" + msg.TokenId
+	// xxl TODO
+	nftID := "Cat-" + msg.TokenId
 	nft := nft.NFT{
 		ClassId: types.CreateClassID(contract.String()),
 		Id:      nftID,
