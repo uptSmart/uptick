@@ -66,7 +66,7 @@ The command above will create a docker container: `uptickhq/uptick:latest`. Now 
 docker run -it -p 26657:26657 -p 26656:26656 -v ~/.uptickd/:/root/.uptickd uptickhq/uptick:latest uptickd version
 
 # To initialize
-# docker run -it -p 26657:26657 -p 26656:26656 -v ~/.uptickd/:/root/.uptickd uptickhq/uptick:latest uptickd init test-chain --chain-id test_7776-2
+# docker run -it -p 26657:26657 -p 26656:26656 -v ~/.uptickd/:/root/.uptickd uptickhq/uptick:latest uptickd init test-chain --chain-id test_7000-2
 
 # To run
 # docker run -it -p 26657:26657 -p 26656:26656 -v ~/.uptickd/:/root/.uptickd uptickhq/uptick:latest uptickd start

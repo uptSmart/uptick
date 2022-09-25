@@ -12,7 +12,7 @@ You specify the network you want to join by setting the **genesis file** and **s
 
 | Network Chain ID | Description                       | Site                                                                     | Version                                               |
 |------------------|-----------------------------------|--------------------------------------------------------------------------|-------------------------------------------------------|
-| `uptick_7776-1`   | Uptick Testnet | [uptick_7776-1 testnet](https://github.com/UptickNetwork/uptick-testnet/tree/main/uptick_7776-1) | [`v0.1.x`](https://github.com/UptickNetwork/uptick/releases) |
+| `uptick_7000-1`   | Uptick Testnet | [uptick_7000-1 testnet](https://github.com/UptickNetwork/uptick-testnet/tree/main/uptick_7000-1) | [`v0.1.x`](https://github.com/UptickNetwork/uptick/releases) |
 
 ## Install `uptickd`
 
@@ -31,7 +31,7 @@ See the Official [Chain IDs](./../basics/chain_id.md#official-chain-ids) for ref
 :::
 
 ```bash
-uptickd config chain-id uptick_7776-1
+uptickd config chain-id uptick_7000-1
 ```
 
 ## Initialize Node
@@ -39,7 +39,7 @@ uptickd config chain-id uptick_7776-1
 We need to initialize the node to create all the necessary validator and node configuration files:
 
 ```bash
-uptickd init <your_custom_moniker> --chain-id uptick_7776-1
+uptickd init <your_custom_moniker> --chain-id uptick_7000-1
 ```
 
 ::: danger
@@ -56,7 +56,7 @@ In the `config` directory, the most important files for configuration are `app.t
 Check the `genesis.json` file from the [`testnets`](https://github.com/UptickNetwork/uptick-testnet) repository and copy it over to the `config` directory: `~/.uptickd/config/genesis.json`. This is a genesis file with the chain-id and genesis accounts balances.
 
 ```bash
-curl https://raw.githubusercontent.com/UptickNetwork/uptick-testnet/main/uptick_7776-1/genesis.json > ~/.uptickd/config/genesis.json
+curl https://raw.githubusercontent.com/UptickNetwork/uptick-testnet/main/uptick_7000-1/genesis.json > ~/.uptickd/config/genesis.json
 ```
 
 Then verify the correctness of the genesis configuration file:
@@ -86,7 +86,7 @@ seeds = "<node-id>@<ip>:<p2p port>"
 You can use the following code to get seeds from the repo and add it to your config:
 
 ```bash
-SEEDS=`curl -sL https://raw.githubusercontent.com/UptickNetwork/uptick-testnet/main/uptick_7776-1/seeds.txt | awk '{print $1}' | paste -s -d, -`
+SEEDS=`curl -sL https://raw.githubusercontent.com/UptickNetwork/uptick-testnet/main/uptick_7000-1/seeds.txt | awk '{print $1}' | paste -s -d, -`
 sed -i.bak -e "s/^seeds =.*/seeds = \"$SEEDS\"/" ~/.uptickd/config/config.toml
 ```
 
@@ -100,7 +100,7 @@ We can set the [`persistent_peers`](https://docs.tendermint.com/master/tendermin
 available peers on the [`testnets`](https://github.com/UptickNetwork/uptick-testnet) repo.
 
 ```bash
-PEERS=`curl -sL https://raw.githubusercontent.com/UptickNetwork/uptick-testnet/main/uptick_7776-1/peers.txt | sort -R | head -n 10 | awk '{print $1}' | paste -s -d, -`
+PEERS=`curl -sL https://raw.githubusercontent.com/UptickNetwork/uptick-testnet/main/uptick_7000-1/peers.txt | sort -R | head -n 10 | awk '{print $1}' | paste -s -d, -`
 ```
 
 Use `sed` to include them into the configuration. You can also add them manually:
@@ -118,7 +118,7 @@ uptickd start
 ## Run a Testnet Validator
 
 Claim your testnet {{ $themeConfig.project.testnet_denom }} on the [faucet](./faucet.md) using your validator account address and submit your validator account address:
-> NOTE: Until `uptickd status 2>&1 | jq ."SyncInfo"."catching_up"` got false, create your validator. If your validator is jailed, unjail it via `uptickd tx slashing unjail --from <wallet name> --chain-id uptick_7776-1 -y -b block`.
+> NOTE: Until `uptickd status 2>&1 | jq ."SyncInfo"."catching_up"` got false, create your validator. If your validator is jailed, unjail it via `uptickd tx slashing unjail --from <wallet name> --chain-id uptick_7000-1 -y -b block`.
 
 ::: tip
 For more details on how to configure your validator, follow the validator [setup](./../guides/validators/setup.md) instructions.
@@ -128,7 +128,7 @@ uptickd tx staking create-validator \
   --amount=5000000000000000000auptick \
   --pubkey=$(uptickd tendermint show-validator) \
   --moniker="UptickBuilder" \
-  --chain-id=uptick_7776-1 \
+  --chain-id=uptick_7000-1 \
   --commission-rate="0.10" \
   --commission-max-rate="0.20" \
   --commission-max-change-rate="0.01" \

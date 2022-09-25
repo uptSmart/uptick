@@ -109,13 +109,13 @@ uptickd config
 
 We can make changes to the default settings upon our choices, so it allows users to set the configuration beforehand all at once, so it would be ready with the same config afterward.
 
-For example, the chain identifier can be changed to `uptick_7776-1` from a blank name by using:
+For example, the chain identifier can be changed to `uptick_7000-1` from a blank name by using:
 
 ```bash
-uptickd config "chain-id" uptick_7776-1
+uptickd config "chain-id" uptick_7000-1
 uptickd config
 {
- "chain-id": "uptick_7776-1",
+ "chain-id": "uptick_7000-1",
  "keyring-backend": "os",
  "output": "text",
  "node": "tcp://localhost:26657",
@@ -135,7 +135,7 @@ Alternatively, we can directly make the changes to the config values in one plac
 
 # The network chain ID
 
-chain-id = "uptick_7776-1"
+chain-id = "uptick_7000-1"
 
 # The keyring's backend, where the keys are stored (os|file|kwallet|pass|test|memory)
 
@@ -154,12 +154,12 @@ node = "tcp://localhost:26657"
 broadcast-mode = "sync"
 ```
 
-After the necessary changes are made in the `client.toml`, then save. For example, if we directly change the chain-id from `uptick_{{ $themeConfig.project.testnet_chain_id }}-2` to `upticktest_7776-1`, and output to number, it would change instantly as shown below.
+After the necessary changes are made in the `client.toml`, then save. For example, if we directly change the chain-id from `uptick_{{ $themeConfig.project.testnet_chain_id }}-2` to `upticktest_7000-1`, and output to number, it would change instantly as shown below.
 
 ```bash
 uptickd config
 {
- "chain-id": "upticktest_7776-1",
+ "chain-id": "upticktest_7000-1",
  "keyring-backend": "os",
  "output": "number",
  "node": "tcp://localhost:26657",
