@@ -95,18 +95,19 @@ func validateIBC(metadata banktypes.Metadata) error {
 		return nil
 	}
 
-	if len(denomSplit) != 2 || denomSplit[0] != ibctransfertypes.DenomPrefix {
-		// NOTE: should be unaccessible (covered on ValidateIBCDenom)
-		return fmt.Errorf("invalid metadata. %s denomination should be prefixed with the format 'ibc/", metadata.Base)
-	}
-
-	if !strings.Contains(metadata.Name, "channel-") {
-		return fmt.Errorf("invalid metadata (Name) for ibc. %s should include channel", metadata.Name)
-	}
-
-	if !strings.HasPrefix(metadata.Symbol, "ibc") {
-		return fmt.Errorf("invalid metadata (Symbol) for ibc. %s should include \"ibc\" prefix", metadata.Symbol)
-	}
+	//commit out propsal name check
+	//if len(denomSplit) != 2 || denomSplit[0] != ibctransfertypes.DenomPrefix {
+	//	// NOTE: should be unaccessible (covered on ValidateIBCDenom)
+	//	return fmt.Errorf("invalid metadata. %s denomination should be prefixed with the format 'ibc/", metadata.Base)
+	//}
+	//
+	//if !strings.Contains(metadata.Name, "channel-") {
+	//	return fmt.Errorf("invalid metadata (Name) for ibc. %s should include channel", metadata.Name)
+	//}
+	//
+	//if !strings.HasPrefix(metadata.Symbol, "ibc") {
+	//	return fmt.Errorf("invalid metadata (Symbol) for ibc. %s should include \"ibc\" prefix", metadata.Symbol)
+	//}
 
 	return nil
 }

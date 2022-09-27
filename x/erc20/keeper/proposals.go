@@ -72,13 +72,15 @@ func (k Keeper) DeployERC20Contract(
 	ctx sdk.Context,
 	coinMetadata banktypes.Metadata,
 ) (common.Address, error) {
-	decimals := uint8(coinMetadata.DenomUnits[0].Exponent)
+	
+	decimals := uint8(coinMetadata.DenomUnits[1].Exponent)
 	ctorArgs, err := contracts.ERC20MinterBurnerDecimalsContract.ABI.Pack(
 		"",
 		coinMetadata.Name,
 		coinMetadata.Symbol,
 		decimals,
 	)
+
 	if err != nil {
 		return common.Address{}, sdkerrors.Wrapf(types.ErrABIPack, "coin metadata is invalid %s: %s", coinMetadata.Name, err.Error())
 	}
